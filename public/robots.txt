@@ -1,0 +1,10 @@
+# robots.txt — see https://www.robotstxt.org/
+
+# Allow all well-behaved crawlers to index everything. The teleprompter app
+# at /app/ is the money page and IS indexable (it's the product surface).
+
+User-agent: *
+Allow: /
+
+# Sitemap discovery
+Sitemap: https://floatingteleprompter.com/sitemap.xml

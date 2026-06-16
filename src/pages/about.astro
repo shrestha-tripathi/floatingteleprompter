@@ -1,0 +1,135 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../site.config";
+
+const aboutSchema = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "@id": `${site.url}/about#about`,
+  url: `${site.url}/about/`,
+  name: `About ${site.shortName}`,
+  description: `Who built ${site.name} and why — a private, browser-based teleprompter that floats over any recording app.`,
+  publisher: { "@id": `${site.url}/#organization` },
+};
+---
+
+<Layout
+  title="About — why we built a floating teleprompter"
+  description={`${site.name} is a free, private, browser-based teleprompter that floats over any recording app. Built by ${site.author} as an independent project.`}
+  jsonLd={[aboutSchema]}
+>
+  <Header />
+
+  <main class="mx-auto max-w-[760px] px-6 md:px-12 py-16 md:py-24">
+    <p class="text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">About</p>
+    <h1 class="mt-4 text-4xl md:text-6xl font-semibold tracking-tight">
+      We built the teleprompter we wanted to record with.
+    </h1>
+    <p class="mt-6 text-lg text-[var(--color-fg-muted)]">
+      {site.name} is a browser teleprompter built around one idea every other web
+      teleprompter misses: it should <em>float on top of the app you're recording
+      with</em>, not take over the whole screen.
+    </p>
+
+    <hr class="my-12 border-[var(--color-border)]" />
+
+    <section class="space-y-10 text-[var(--color-fg-muted)] leading-relaxed">
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)] tracking-tight">
+          The problem we couldn't stop thinking about
+        </h2>
+        <p class="mt-3">
+          Every web teleprompter is fullscreen or in-tab. That's fine if you're
+          reading to a webcam with nothing else open — but the moment you're recording
+          in OBS, on a Zoom call, or in Loom, the teleprompter is buried behind your
+          recording window. You end up squinting at a second monitor or, worse, reading
+          off to the side so your eyes never meet the camera.
+        </p>
+        <p class="mt-3">
+          The fix existed in dedicated apps that cost money and need installing. We
+          wanted it free, in the browser, on top of everything.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)] tracking-tight">
+          What we built instead
+        </h2>
+        <p class="mt-3">
+          {site.name} uses
+          <strong class="text-[var(--color-fg)]">Document Picture-in-Picture</strong> —
+          a browser capability that lets a page pop part of its interface into a small,
+          always-on-top window. We move the scrolling script into that window so it
+          hovers over OBS, Zoom, Loom or any other app while you record. The same scroll
+          engine keeps running; you just drag the window under your camera and read.
+        </p>
+        <p class="mt-3">
+          There's no backend. The whole tool is static files plus a little JavaScript
+          running on your machine. Your script is saved only in your browser, and
+          nothing is ever uploaded.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)] tracking-tight">
+          Our principles
+        </h2>
+        <ul class="mt-4 list-disc pl-6 space-y-3">
+          <li>
+            <strong class="text-[var(--color-fg)]">Your words are your business.</strong>
+            Scripts stay on your device. We don't store them, read them, or analyze them —
+            the architecture makes it impossible, not just a policy promise.
+          </li>
+          <li>
+            <strong class="text-[var(--color-fg)]">No accounts, ever.</strong>
+            Open the page and start reading. No email, no onboarding, no CRM.
+          </li>
+          <li>
+            <strong class="text-[var(--color-fg)]">Free, with no watermark.</strong>
+            Since there's nothing to host or store, there's nothing to charge for.
+          </li>
+          <li>
+            <strong class="text-[var(--color-fg)]">Works everywhere a browser does.</strong>
+            The floating window is desktop Chromium; everywhere else falls back to
+            fullscreen — the teleprompter itself works on every device.
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)] tracking-tight">
+          Who built this
+        </h2>
+        <p class="mt-3">
+          {site.name} is built and maintained by
+          <strong class="text-[var(--color-fg)]">{site.author}</strong>, an independent
+          software engineer who makes small, privacy-first browser tools. It started as
+          a fix for a personal annoyance — recording tutorials in OBS with no good way to
+          read a script — and grew into a free tool anyone can use.
+        </p>
+        <p class="mt-3">
+          No company, no investors, no roadmap meetings. Just a tool that does one thing
+          well. Questions or ideas? See the
+          <a href="/contact/" class="text-[var(--color-accent)] underline">contact page</a>.
+        </p>
+      </div>
+    </section>
+
+    <div class="mt-16 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-6 md:p-8">
+      <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)]">Try it now</h2>
+      <p class="mt-3 text-[var(--color-fg-muted)]">
+        Paste a script and float it over your recording app. No signup, no install.
+      </p>
+      <a
+        href="/app/"
+        class="mt-6 inline-flex h-10 items-center rounded-md bg-[var(--color-accent)] px-5 text-sm font-semibold text-[var(--color-accent-fg)] no-underline transition-opacity hover:opacity-90"
+      >
+        Open the teleprompter →
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

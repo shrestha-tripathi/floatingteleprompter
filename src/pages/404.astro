@@ -1,0 +1,39 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="404 — Page not found" description="The page you requested doesn't exist." noindex>
+  <main class="min-h-screen flex items-center justify-center px-6 text-center">
+    <div class="max-w-lg">
+      <div class="relative inline-block">
+        <h1 aria-hidden="true" class="text-[7rem] md:text-[10rem] font-semibold leading-none tracking-tighter text-[var(--color-fg)] select-none">
+          404
+        </h1>
+        <span aria-hidden="true" class="absolute inset-0 text-[7rem] md:text-[10rem] font-semibold leading-none tracking-tighter text-[var(--color-accent)] select-none opacity-40 translate-x-[3px] -translate-y-[2px]">
+          404
+        </span>
+      </div>
+
+      <p class="mt-2 text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">Off script</p>
+      <h2 class="mt-3 text-2xl md:text-3xl font-semibold tracking-tight">
+        This line isn't in the script.
+      </h2>
+      <p class="mt-4 text-[var(--color-fg-muted)]">
+        The page may have been moved or deleted — or the link you followed had a typo.
+        Let's get you back to the teleprompter.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <a href="/" class="inline-flex h-10 items-center rounded-md bg-[var(--color-fg)] px-4 text-sm font-medium text-[var(--color-bg)] no-underline transition-opacity hover:opacity-90">
+          ← Back home
+        </a>
+        <a href="/app/" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] px-4 text-sm font-medium no-underline transition-colors hover:bg-[var(--color-bg-muted)]">
+          Open teleprompter
+        </a>
+        <a href="/faq/" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] px-4 text-sm font-medium no-underline transition-colors hover:bg-[var(--color-bg-muted)]">
+          FAQ
+        </a>
+      </div>
+    </div>
+  </main>
+</Layout>

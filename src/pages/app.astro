@@ -1,0 +1,32 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import { site } from "../site.config";
+
+// Placeholder for the first (skeleton) commit. The full teleprompter — script
+// box, rAF scroll engine, controls and the Document Picture-in-Picture float —
+// is wired in step 2. Indexable: this is the product / money page.
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "@id": `${site.url}/app#webapp`,
+  name: site.name,
+  url: `${site.url}/app/`,
+  applicationCategory: "MultimediaApplication",
+  operatingSystem: "Any (Chrome, Edge, Firefox, Safari)",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  publisher: { "@id": `${site.url}/#organization` },
+};
+---
+
+<Layout
+  title="Teleprompter — Paste Your Script & Record"
+  description="Free online teleprompter. Paste your script, set the speed, and float it over your recording app."
+  jsonLd={[webAppSchema]}
+>
+  <Header />
+  <main class="mx-auto max-w-[1000px] px-4 md:px-8 py-16 text-center">
+    <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">Teleprompter</h1>
+    <p class="mt-4 text-[var(--color-fg-muted)]">The teleprompter is loading…</p>
+  </main>
+</Layout>

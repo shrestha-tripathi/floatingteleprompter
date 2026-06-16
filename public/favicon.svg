@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Floating Teleprompter — lines of scrolling script + a play triangle.
+       The amber accent reads as "stage light / on-air / recording". The
+       rounded square is the floating window the script pops into. -->
+  <rect x="40" y="40" width="432" height="432" rx="96"
+    fill="none" stroke="#ea580c" stroke-width="26" class="frame" />
+  <!-- Lines of script -->
+  <g stroke="#ea580c" stroke-width="30" stroke-linecap="round" class="lines">
+    <path d="M128 168 H384" />
+    <path d="M128 240 H320" />
+    <path d="M128 312 H256" />
+  </g>
+  <!-- Play triangle (record / read) bottom-right -->
+  <path d="M300 300 L392 348 L300 396 Z" fill="#ea580c" class="play" />
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .frame { stroke: #fb923c; }
+      .lines { stroke: #fb923c; }
+      .play  { fill: #fb923c; }
+    }
+  </style>
+</svg>
