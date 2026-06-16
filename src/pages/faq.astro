@@ -1,0 +1,107 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../site.config";
+
+// Real search-intent questions → FAQPage rich-result eligibility.
+const faqs = [
+  {
+    q: "Is this teleprompter free?",
+    a: `Yes — ${site.name} is completely free, with no watermark, no signup and no install. There's no paid tier and nothing to upgrade. Because the whole tool runs in your browser with no servers to pay for, there's nothing to charge for.`,
+  },
+  {
+    q: "Does it work over Zoom, OBS, Loom or other recording apps?",
+    a: "Yes — that's the whole point. Click \"Float on top\" and the scrolling script pops into a small always-on-top window (using your browser's Document Picture-in-Picture feature) that hovers over OBS, Zoom, Loom, CapCut, Google Meet or any other app while you record. Drag it just under your webcam and read while looking at the camera.",
+  },
+  {
+    q: "Does my script get uploaded anywhere?",
+    a: "No. Your script never leaves your device. It's saved only in your browser's local storage so it's still there when you come back, and it's never sent to any server. There is no backend — the tool is just static files and JavaScript running on your machine.",
+  },
+  {
+    q: "Can I use it on my phone?",
+    a: "The teleprompter itself works on phones and tablets — paste your script, set the speed, and it scrolls. The floating \"on top of other apps\" window is a desktop-Chromium feature (Chrome and Edge), so on mobile and on Safari/Firefox you get a fullscreen teleprompter instead of a floating one.",
+  },
+  {
+    q: "What is mirror mode?",
+    a: "Mirror mode flips the text horizontally. Hardware teleprompter rigs use a piece of angled glass (a beam splitter) in front of the lens that reflects a screen — the reflection reverses the text, so you feed it mirrored text that reads correctly in the reflection. If you're reading straight off your monitor, leave mirror off.",
+  },
+  {
+    q: "Does it work offline?",
+    a: "Once the page has loaded, the teleprompter runs entirely on your device, so a flaky connection won't interrupt your recording. Nothing is fetched or uploaded while you read.",
+  },
+  {
+    q: "How do I control the scroll speed?",
+    a: "Use the Speed slider (measured in words per minute, default 130) or the up/down arrow keys while reading. You can also change font size, line height and column width live, and everything you set is remembered for next time.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": `${site.url}/faq#faq`,
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+---
+
+<Layout
+  title="FAQ — free floating teleprompter for recording"
+  description="Answers about the free online teleprompter: is it free, does it work over Zoom/OBS, does your script upload, mobile support, mirror mode and offline use."
+  path="/faq/"
+  jsonLd={[faqSchema]}
+>
+  <Header />
+
+  <main class="mx-auto max-w-[760px] px-6 md:px-12 py-16 md:py-24">
+    <p class="text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">FAQ</p>
+    <h1 class="mt-4 text-4xl md:text-5xl font-semibold tracking-tight">
+      Frequently asked questions
+    </h1>
+    <p class="mt-6 text-lg text-[var(--color-fg-muted)]">
+      Everything about using {site.name} to record talking-head video.
+    </p>
+
+    <div class="mt-12 space-y-4">
+      {
+        faqs.map((f) => (
+          <details
+            class="group rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-5 md:p-6 [&_summary::-webkit-details-marker]:hidden"
+          >
+            <summary class="flex cursor-pointer items-center justify-between gap-4 text-base md:text-lg font-medium text-[var(--color-fg)]">
+              {f.q}
+              <svg
+                class="size-5 shrink-0 text-[var(--color-fg-subtle)] transition-transform group-open:rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </summary>
+            <p class="mt-3 text-[var(--color-fg-muted)] leading-relaxed">{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+
+    <div class="mt-16 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-6 md:p-8 text-center">
+      <h2 class="text-xl md:text-2xl font-semibold text-[var(--color-fg)]">Ready to record?</h2>
+      <p class="mt-3 text-[var(--color-fg-muted)]">Paste your script and float it over your recording app.</p>
+      <a
+        href="/app/"
+        class="mt-6 inline-flex h-10 items-center rounded-md bg-[var(--color-accent)] px-5 text-sm font-semibold text-[var(--color-accent-fg)] no-underline transition-opacity hover:opacity-90"
+      >
+        Open the teleprompter →
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
