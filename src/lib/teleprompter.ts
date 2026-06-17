@@ -205,7 +205,11 @@ export function initTeleprompter(): void {
 
   function applyTransform(): void {
     if (!track) return;
-    const base = `translate(-50%, ${-offset}px)`;
+    // translate3d (not 2D translate) so the moving text rides a real GPU layer
+    // and its sub-pixel Y is INTERPOLATED on the compositor instead of the glyphs
+    // being re-rasterized + re-snapped to the pixel grid every frame — that
+    // per-frame re-snap is what read as a tiny vertical shimmer/shake mid-scroll.
+    const base = `translate3d(-50%, ${-offset}px, 0)`;
     track.style.transform = mirrored ? `${base} scaleX(-1)` : base;
   }
 

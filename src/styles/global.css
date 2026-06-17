@@ -253,7 +253,7 @@ a {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translate(-50%, 0);
+  transform: translate3d(-50%, 0, 0);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -263,6 +263,12 @@ a {
   font-weight: 600;
   color: #ffffff;
   will-change: transform;
+  /* Force the track onto its own GPU compositing layer so the rAF scroll's
+     sub-pixel Y is interpolated by the compositor, not re-rasterized + grid-
+     snapped per frame (that re-snap is the tiny vertical shake during scroll).
+     backface-visibility:hidden is the well-worn nudge that pins the layer. */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 /* The first line begins centred on the eyeline; the engine adds top padding via
    an inline style so it can be recomputed when the viewport resizes. */
@@ -270,7 +276,7 @@ a {
 /* Mirror mode — horizontal flip for beam-splitter rigs. Applied to the track
    so the eyeline + indicators stay un-mirrored. */
 .ftp-track.is-mirrored {
-  transform: translate(-50%, 0) scaleX(-1);
+  transform: translate3d(-50%, 0, 0) scaleX(-1);
 }
 
 /* Eyeline indicator — a fixed horizontal guide at camera height. The reader
