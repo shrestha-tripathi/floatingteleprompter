@@ -281,6 +281,21 @@ export function initTeleprompter(): void {
     applyTransform();
     updateProgress();
     endcard?.classList.add("hidden");
+    // Re-warm the track's GPU compositing layer before a restarted scroll.
+    // The shake fix (1ffba8c) pins the layer via will-change + backface-
+    // visibility, but Chrome can recycle that layer while the track sits idle
+    // on the end-card. A *restarted* scroll then runs its first frames un-
+    // composited → glyphs re-snap to the pixel grid → the tiny vertical
+    // shimmer briefly returns (smooth on first run, shaky after restart).
+    // Toggling will-change forces a fresh promotion now, on the user gesture,
+    // so the rAF loop starts on an already-warm layer. Defensive + cheap (one
+    // reflow on a click, never per-frame); restart() never fires mid-scroll so
+    // there's no resume hitch risk.
+    if (track) {
+      track.style.willChange = "auto";
+      void track.offsetHeight; // flush so the de-promote is processed
+      track.style.willChange = "transform";
+    }
   }
 
   let countingDown = false;
