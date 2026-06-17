@@ -72,6 +72,7 @@ export function initTeleprompter(): void {
   const mirrorBtn = $("ftp-mirror");
   const floatBtn = $("ftp-float");
   const fullscreenBtn = $("ftp-fullscreen");
+  const fauxExitBtn = $("ftp-faux-exit");
   const editBtn = $("ftp-edit");
   const helpBtn = $("ftp-help");
   const clearBtn = $("ftp-clear");
@@ -170,6 +171,36 @@ export function initTeleprompter(): void {
       return;
     }
     requestAnimationFrame(() => recomputeBoundsWhenReady(cb, tries + 1));
+  }
+
+  // ---- progress-preserving re-measure (resize / PiP-resize / fullscreen) ----
+  // ANY viewport size change must re-run recomputeBounds so startPad, textHeight
+  // and maxOffset match the NEW size — and must keep the reader at the same
+  // FRACTION scrolled instead of snapping. The original code only handled
+  // MAIN-window resize, so resizing the floating Document-PiP window was missed
+  // entirely: the geometry stayed frozen at open-time values, which is why the
+  // eyeline drifted out of alignment, lines fell outside the visible area, and
+  // the script "finished" before reaching the orange line after a PiP resize.
+  let remeasureScheduled = false;
+  function remeasureNow(): void {
+    const prevRatio = maxOffset > 0 ? offset / maxOffset : 0;
+    if (!recomputeBounds()) return; // not laid out yet — a later trigger retries
+    offset = Math.min(maxOffset, Math.max(0, prevRatio * maxOffset));
+    applyTransform();
+    updateProgress();
+  }
+  function scheduleRemeasure(): void {
+    if (remeasureScheduled) return;
+    remeasureScheduled = true;
+    const run = (): void => {
+      remeasureScheduled = false;
+      if (prompter && !prompter.classList.contains("hidden")) remeasureNow();
+    };
+    // Use the floating window's own animation clock while in PiP — the main
+    // tab's requestAnimationFrame can be throttled when the user has clicked
+    // away into their recording app, which would delay the re-measure.
+    if (pipActive && pipWin) pipWin.requestAnimationFrame(run);
+    else requestAnimationFrame(run);
   }
 
   function applyTransform(): void {
@@ -310,6 +341,7 @@ export function initTeleprompter(): void {
     pause();
     disarmMediaKeys();
     if (pipActive) closePip();
+    if (fauxFull) exitFaux();
     prompter?.classList.add("hidden");
     editor?.classList.remove("hidden");
   }
@@ -329,6 +361,7 @@ export function initTeleprompter(): void {
   // ================= Document Picture-in-Picture =================
   let pipActive = false;
   let pipWin: Window | null = null;
+  let pipResizeHandler: (() => void) | null = null;
   let stageOriginParent: Node | null = null;
   let stageOriginNext: Node | null = null;
 
@@ -345,6 +378,9 @@ export function initTeleprompter(): void {
   async function openPip(): Promise<void> {
     const pip = getDocPiP();
     if (!pip || !stage) return;
+    // Leaving faux-fullscreen first: the stage is about to move into the PiP doc,
+    // and the `.ftp-fauxscreen` fixed-position styles would follow it there.
+    if (fauxFull) exitFaux();
     try {
       pipWin = await pip.requestWindow({ width: 420, height: 680 });
     } catch {
@@ -360,25 +396,41 @@ export function initTeleprompter(): void {
     floatBtn?.classList.add("is-active");
     // Keyboard control inside the floating window.
     pipWin.addEventListener("keydown", onKey as EventListener);
+    // Explicit PiP-window resize listener. The ResizeObserver on the viewport is
+    // the primary trigger, but cross-realm observer delivery into a detached
+    // Document-PiP document isn't guaranteed across browsers — this guarantees a
+    // re-measure when the user drags the floating window's edges.
+    pipResizeHandler = () => scheduleRemeasure();
+    pipWin.addEventListener("resize", pipResizeHandler);
     // Ensure media keys are armed so the user can control the scroll once they
     // click away into their recording app and the PiP/browser loses focus.
     void armMediaKeys();
     showMediaKeyHint();
     // Restore when the PiP window closes (user clicks its native ✕, or tab closes).
     pipWin.addEventListener("pagehide", restoreFromPip, { once: true });
-    // Resize bounds for the small window.
-    requestAnimationFrame(recomputeBounds);
+    // Measure for the small window, preserving scroll progress, once laid out.
+    recomputeBoundsWhenReady(() => remeasureNow());
   }
 
   function restoreFromPip(): void {
     if (!stage) return;
+    if (pipWin && pipResizeHandler) {
+      try {
+        pipWin.removeEventListener("resize", pipResizeHandler);
+      } catch {
+        /* ignore */
+      }
+    }
+    pipResizeHandler = null;
     if (stageOriginParent) {
       stageOriginParent.insertBefore(stage, stageOriginNext);
     }
     pipActive = false;
     pipWin = null;
     floatBtn?.classList.remove("is-active");
-    requestAnimationFrame(recomputeBounds);
+    // Back in the main document — re-measure for the page-sized stage, keeping
+    // the reader's scroll progress.
+    recomputeBoundsWhenReady(() => remeasureNow());
   }
 
   function closePip(): void {
@@ -392,13 +444,50 @@ export function initTeleprompter(): void {
   }
 
   // ================= Fullscreen =================
+  // Native Fullscreen API where it exists (desktop Chrome/Edge/Firefox, Android
+  // Chrome), with a CSS "faux fullscreen" fallback for iOS Safari — which does
+  // NOT implement requestFullscreen on non-<video> elements, so the native call
+  // is `undefined` there and tapping the button would silently do nothing.
+  let fauxFull = false;
+
+  function enterFaux(): void {
+    if (!stage) return;
+    fauxFull = true;
+    stage.classList.add("ftp-fauxscreen");
+    document.documentElement.classList.add("ftp-noscroll");
+    // Geometry changed (now full-viewport) — re-measure, tolerating the 0-height
+    // first frame on mobile via the retry helper.
+    recomputeBoundsWhenReady();
+  }
+  function exitFaux(): void {
+    if (!stage) return;
+    fauxFull = false;
+    stage.classList.remove("ftp-fauxscreen");
+    document.documentElement.classList.remove("ftp-noscroll");
+    recomputeBoundsWhenReady();
+  }
+
   function toggleFullscreen(): void {
     if (!stage) return;
+    // If we're in the CSS fallback, just toggle it back off.
+    if (fauxFull) {
+      exitFaux();
+      return;
+    }
+    // Native fullscreen path (preferred where supported).
     if (document.fullscreenElement) {
       document.exitFullscreen?.();
-    } else {
-      stage.requestFullscreen?.().then(() => requestAnimationFrame(recomputeBounds)).catch(() => {});
+      return;
     }
+    if (typeof stage.requestFullscreen === "function") {
+      stage
+        .requestFullscreen()
+        .then(() => requestAnimationFrame(recomputeBounds))
+        .catch(() => enterFaux()); // e.g. user-gesture/permission rejection
+      return;
+    }
+    // No native element-fullscreen (iOS Safari) → CSS fallback.
+    enterFaux();
   }
 
   function nudgeSpeed(delta: number): void {
@@ -624,6 +713,10 @@ export function initTeleprompter(): void {
         shortcuts?.removeAttribute("hidden");
         break;
       case "Escape":
+        if (fauxFull) {
+          e.preventDefault();
+          exitFaux();
+        }
         shortcuts?.setAttribute("hidden", "");
         break;
     }
@@ -669,6 +762,7 @@ export function initTeleprompter(): void {
   });
   mirrorBtn?.addEventListener("click", () => setMirror(!mirrored));
   fullscreenBtn?.addEventListener("click", toggleFullscreen);
+  fauxExitBtn?.addEventListener("click", exitFaux);
   helpBtn?.addEventListener("click", () => shortcuts?.removeAttribute("hidden"));
   shortcutsClose?.addEventListener("click", () => shortcuts?.setAttribute("hidden", ""));
   shortcuts?.addEventListener("click", (e) => {
@@ -712,7 +806,19 @@ export function initTeleprompter(): void {
   );
 
   document.addEventListener("keydown", onKey);
-  window.addEventListener("resize", () => {
-    if (!prompter?.classList.contains("hidden")) recomputeBounds();
-  });
+  // Re-measure on ANY size change of the stage's viewport — this is the single
+  // catch-all that fires no matter which document/window owns the element, so it
+  // covers main-window resize, Document-PiP window resize, fullscreen enter/exit,
+  // device rotation, and the on-screen-keyboard reflow. (The old window-only
+  // resize listener missed PiP-window resizes entirely.)
+  if (viewport && typeof ResizeObserver !== "undefined") {
+    const ro = new ResizeObserver(() => scheduleRemeasure());
+    ro.observe(viewport);
+  } else {
+    // Legacy fallback: main-window resize only.
+    window.addEventListener("resize", () => scheduleRemeasure());
+  }
+  // Belt-and-suspenders for fullscreen on browsers where the observer is slow to
+  // fire on the synchronous enter/exit.
+  document.addEventListener("fullscreenchange", () => scheduleRemeasure());
 }
