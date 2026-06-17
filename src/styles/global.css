@@ -468,6 +468,29 @@ a {
 :where(.pip-mode) .ftp-status-badge {
   font-size: 0.6rem;
 }
+/* Shrink the top/bottom fade in the floating window. The default viewport mask
+   uses a 9%-of-height band (graceful + cinematic on the big page stage), but in
+   a compact PiP window 9% top + 9% bottom = ~18% of the height fades to black —
+   and because it's a PERCENTAGE, a 680px-tall float gets a ~61px band, LARGER in
+   absolute px than the page's 520px-capped stage. That eats real estate the tiny
+   window can't spare. Override with a thin FIXED-length band so the fade stays a
+   clean ~24px edge no matter how small the user resizes the float. */
+:where(.pip-mode) .ftp-viewport {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.5rem,
+    #000 calc(100% - 1.5rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 1.5rem,
+    #000 calc(100% - 1.5rem),
+    transparent 100%
+  );
+}
 
 /* Empty-script nudge — shake the textarea when Start is tapped with no script. */
 @keyframes ftp-shake {
