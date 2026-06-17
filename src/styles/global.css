@@ -255,11 +255,17 @@ a {
   display: none;
 }
 
-/* 3-2-1 countdown overlay — covers the stage before scroll begins. */
+/* 3-2-1 countdown overlay — covers the stage before scroll begins.
+   NOTE: display:flex is scoped to :not(.hidden) so the Tailwind `.hidden`
+   utility (display:none) ALWAYS wins when JS toggles it. Without this, these
+   late-defined component rules beat `.hidden` (same @layer, later source order)
+   and the overlay shows permanently — the "Done card always visible" bug. */
+.ftp-countdown:not(.hidden) {
+  display: flex;
+}
 .ftp-countdown {
   position: absolute;
   inset: 0;
-  display: flex;
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.72);
@@ -273,10 +279,12 @@ a {
 }
 
 /* End-of-script "Done — Restart?" overlay. */
+.ftp-endcard:not(.hidden) {
+  display: flex;
+}
 .ftp-endcard {
   position: absolute;
   inset: 0;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
