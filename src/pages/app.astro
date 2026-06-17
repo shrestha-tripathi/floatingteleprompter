@@ -177,6 +177,25 @@ const webAppSchema = {
           <li class="flex items-center justify-between"><span>Fullscreen</span><kbd class="ftp-kbd">F</kbd></li>
           <li class="flex items-center justify-between"><span>This help</span><kbd class="ftp-kbd">?</kbd></li>
         </ul>
+
+        <div class="mt-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-4">
+          <p class="text-sm font-semibold text-[var(--color-fg)]">🎧 Hands-free while floating</p>
+          <p class="mt-1.5 text-xs text-[var(--color-fg-muted)] leading-relaxed">
+            When you float the teleprompter over your recording app, keyboard shortcuts
+            stop working because the browser loses focus. Use your keyboard's
+            <strong class="text-[var(--color-fg)]">media keys</strong> (or a headset / Stream Deck)
+            instead — they work even when another app is in front:
+          </p>
+          <ul class="mt-3 space-y-2 text-sm text-[var(--color-fg-muted)]">
+            <li class="flex items-center justify-between"><span>Play / Pause</span><kbd class="ftp-kbd">⏯</kbd></li>
+            <li class="flex items-center justify-between"><span>Speed up / down</span><span><kbd class="ftp-kbd">⏩</kbd> <kbd class="ftp-kbd">⏪</kbd></span></li>
+            <li class="flex items-center justify-between"><span>Restart from top</span><kbd class="ftp-kbd">⏮</kbd></li>
+          </ul>
+          <p class="mt-2.5 text-[0.7rem] text-[var(--color-fg-subtle)] leading-relaxed">
+            Desktop Chrome &amp; Edge only. We play a silent audio track so your computer
+            routes the media keys to the teleprompter — nothing is recorded or heard.
+          </p>
+        </div>
       </div>
     </div>
   </main>

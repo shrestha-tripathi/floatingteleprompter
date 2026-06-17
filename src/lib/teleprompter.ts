@@ -101,6 +101,9 @@ export function initTeleprompter(): void {
   let maxOffset = 1; // recomputed on layout
   let mirrored = lsGet(LS.mirror, "0") === "1";
   let textHeight = 1; // rendered height of the script text (excl. padding)
+  // Silent-audio element used to arm OS media keys (see MediaSession section).
+  let silentAudio: HTMLAudioElement | null = null;
+  let mediaSessionWired = false;
 
   function currentWordCount(): number {
     const t = scriptBox?.value ?? "";
@@ -218,6 +221,11 @@ export function initTeleprompter(): void {
     if (playLabel) playLabel.textContent = "Pause";
     playBtn?.classList.add("is-active");
     rafId = requestAnimationFrame(tick);
+    // Arm OS media keys so the user can control the scroll while focused on their
+    // recording app (PiP scenario). Safe to call repeatedly; only the first call
+    // creates the silent audio. play() is reached from button/Start gestures.
+    void armMediaKeys();
+    syncMediaState();
   }
 
   function pause(): void {
@@ -226,6 +234,7 @@ export function initTeleprompter(): void {
     statusBadge?.classList.remove("hidden");
     if (playLabel) playLabel.textContent = "Play";
     playBtn?.classList.remove("is-active");
+    syncMediaState();
   }
 
   function togglePlay(): void {
@@ -299,6 +308,7 @@ export function initTeleprompter(): void {
   }
   function showEditor(): void {
     pause();
+    disarmMediaKeys();
     if (pipActive) closePip();
     prompter?.classList.add("hidden");
     editor?.classList.remove("hidden");
@@ -350,6 +360,10 @@ export function initTeleprompter(): void {
     floatBtn?.classList.add("is-active");
     // Keyboard control inside the floating window.
     pipWin.addEventListener("keydown", onKey as EventListener);
+    // Ensure media keys are armed so the user can control the scroll once they
+    // click away into their recording app and the PiP/browser loses focus.
+    void armMediaKeys();
+    showMediaKeyHint();
     // Restore when the PiP window closes (user clicks its native ✕, or tab closes).
     pipWin.addEventListener("pagehide", restoreFromPip, { once: true });
     // Resize bounds for the small window.
@@ -387,6 +401,179 @@ export function initTeleprompter(): void {
     }
   }
 
+  function nudgeSpeed(delta: number): void {
+    if (!speed) return;
+    const next = Math.max(60, Math.min(300, Number(speed.value) + delta));
+    speed.value = String(next);
+    speed.dispatchEvent(new Event("input"));
+  }
+
+  // ================= Hands-off control via OS media keys =================
+  //
+  // Problem: when the teleprompter is floating in a Document Picture-in-Picture
+  // window and the user clicks into their RECORDING app (OBS/Zoom/Loom), the
+  // browser loses keyboard focus — so the keydown shortcuts stop working. The
+  // user can't pause or adjust speed without clicking back to the browser.
+  //
+  // Fix: the OS media keys (the play/pause and ⏮/⏭ keys on keyboards, headsets,
+  // Stream Decks, etc.) are delivered via the MediaSession API and fire REGARDLESS
+  // of which window has focus. But the OS only routes them to a tab that is
+  // actively producing media. So we play a looping, effectively-silent <audio>
+  // element to "arm" the media session, then map the media-key actions onto the
+  // teleprompter controls.
+  //
+  // Constraints learned the hard way (do not "simplify" these away):
+  //  - It MUST be an <audio> element. The Web Audio API does NOT request OS audio
+  //    focus, so an oscillator/GainNode will NOT capture media keys (per Chrome's
+  //    own Media Session docs).
+  //  - The <audio> + navigator.mediaSession live on the MAIN page, never inside
+  //    the PiP document. mediaSession is global to the top-level browsing context,
+  //    and keeping audio in the opener means it survives PiP open/close cleanly.
+  //  - play() needs a user gesture — we only ever start it from the Play button /
+  //    Start, which are gestures, so autoplay policy is satisfied.
+  //  - Desktop Chrome/Edge only. Safari partial, Firefox lacks it. Feature-detect
+  //    and degrade silently — the on-screen + keyboard controls always still work.
+
+  function makeSilentWavUri(): string {
+    // ~0.4s of near-silence, 8kHz mono 16-bit. Tiny non-zero samples so the audio
+    // graph is "active" (some engines optimize away a literally-all-zero buffer),
+    // played at volume ~0.0001 so it's inaudible.
+    const sampleRate = 8000;
+    const seconds = 0.4;
+    const n = Math.floor(seconds * sampleRate);
+    const dataLen = n * 2;
+    const buf = new ArrayBuffer(44 + dataLen);
+    const dv = new DataView(buf);
+    const w = (o: number, s: string) => {
+      for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i));
+    };
+    w(0, "RIFF");
+    dv.setUint32(4, 36 + dataLen, true);
+    w(8, "WAVE");
+    w(12, "fmt ");
+    dv.setUint32(16, 16, true);
+    dv.setUint16(20, 1, true);
+    dv.setUint16(22, 1, true);
+    dv.setUint32(24, sampleRate, true);
+    dv.setUint32(28, sampleRate * 2, true);
+    dv.setUint16(32, 2, true);
+    dv.setUint16(34, 16, true);
+    w(36, "data");
+    dv.setUint32(40, dataLen, true);
+    for (let i = 0; i < n; i++) dv.setInt16(44 + i * 2, i % 2 ? 1 : -1, true);
+    let bin = "";
+    const u8 = new Uint8Array(buf);
+    for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+    return "data:audio/wav;base64," + btoa(bin);
+  }
+
+  function mediaSupported(): boolean {
+    return "mediaSession" in navigator &&
+      typeof navigator.mediaSession?.setActionHandler === "function";
+  }
+
+  function ensureMediaSession(): void {
+    if (mediaSessionWired || !mediaSupported()) return;
+    mediaSessionWired = true;
+
+    silentAudio = new Audio(makeSilentWavUri());
+    silentAudio.loop = true;
+    silentAudio.volume = 0.0001;
+    // Keep it out of the AT / tab-audio UI as much as possible.
+    silentAudio.setAttribute("aria-hidden", "true");
+
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "Teleprompter",
+        artist: "Floating Teleprompter",
+        album: "Hands-free control",
+      });
+    } catch {
+      /* MediaMetadata may be unavailable — non-fatal */
+    }
+
+    const set = (
+      action: MediaSessionAction,
+      handler: (() => void) | null,
+    ) => {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch {
+        /* unsupported action on this browser — ignore */
+      }
+    };
+
+    // Map media keys → teleprompter controls.
+    set("play", () => play());
+    set("pause", () => pause());
+    set("stop", () => pause());
+    // Seek keys → speed up / down (most useful hands-off adjustment).
+    set("seekforward", () => nudgeSpeed(10));
+    set("seekbackward", () => nudgeSpeed(-10));
+    // Track keys → restart / jump to top.
+    set("previoustrack", () => restart());
+    set("nexttrack", () => {
+      restart();
+      play();
+    });
+  }
+
+  // Start the silent audio (arms the media keys). Called from a user gesture.
+  async function armMediaKeys(): Promise<void> {
+    if (!mediaSupported()) return;
+    ensureMediaSession();
+    if (!silentAudio) return;
+    try {
+      await silentAudio.play();
+      navigator.mediaSession.playbackState = "playing";
+    } catch {
+      // Autoplay blocked (no gesture yet) — harmless; on-screen controls work.
+    }
+  }
+
+  function disarmMediaKeys(): void {
+    if (!mediaSupported()) return;
+    try {
+      navigator.mediaSession.playbackState = "none";
+    } catch {
+      /* ignore */
+    }
+    if (silentAudio) {
+      silentAudio.pause();
+    }
+  }
+
+  // Keep the OS notification's play/pause state in sync with the scroll state.
+  function syncMediaState(): void {
+    if (!mediaSupported() || !mediaSessionWired) return;
+    try {
+      navigator.mediaSession.playbackState = playing ? "playing" : "paused";
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // One-time discovery hint shown inside the PiP window the first time the user
+  // floats the teleprompter — tells them media keys work hands-free.
+  function showMediaKeyHint(): void {
+    if (!mediaSupported() || !pipWin) return;
+    if (lsGet("ftp:mediahint", "0") === "1") return;
+    lsSet("ftp:mediahint", "1");
+    try {
+      const doc = pipWin.document;
+      const hint = doc.createElement("div");
+      hint.textContent = "Tip: use your ⏯ media keys to play/pause hands-free while recording.";
+      hint.style.cssText =
+        "position:fixed;left:8px;right:8px;bottom:8px;z-index:50;" +
+        "background:rgba(20,20,20,0.92);color:#fff;font:500 12px/1.4 system-ui,sans-serif;" +
+        "padding:10px 12px;border-radius:8px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5)";
+      doc.body.appendChild(hint);
+      pipWin.setTimeout(() => hint.remove(), 6000);
+    } catch {
+      /* PiP doc may already be gone — ignore */
+    }
+  }
+
   // ================= Keyboard =================
   function onKey(e: KeyboardEvent): void {
     // don't hijack typing in the editor
@@ -406,17 +593,11 @@ export function initTeleprompter(): void {
         break;
       case "ArrowUp":
         e.preventDefault();
-        if (speed) {
-          speed.value = String(Math.min(300, Number(speed.value) + 10));
-          speed.dispatchEvent(new Event("input"));
-        }
+        nudgeSpeed(10);
         break;
       case "ArrowDown":
         e.preventDefault();
-        if (speed) {
-          speed.value = String(Math.max(60, Number(speed.value) - 10));
-          speed.dispatchEvent(new Event("input"));
-        }
+        nudgeSpeed(-10);
         break;
       case "r":
       case "R":
