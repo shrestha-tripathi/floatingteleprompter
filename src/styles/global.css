@@ -408,3 +408,17 @@ a {
 :where(.pip-mode) .ftp-status-badge {
   font-size: 0.6rem;
 }
+
+/* Empty-script nudge — shake the textarea when Start is tapped with no script. */
+@keyframes ftp-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.ftp-shake {
+  animation: ftp-shake 0.4s ease;
+  border-color: var(--color-accent) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ftp-shake { animation: none; }
+}

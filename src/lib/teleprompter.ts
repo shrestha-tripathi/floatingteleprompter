@@ -100,17 +100,23 @@ export function initTeleprompter(): void {
   let offset = 0; // px scrolled from the start position
   let maxOffset = 1; // recomputed on layout
   let mirrored = lsGet(LS.mirror, "0") === "1";
+  let textHeight = 1; // rendered height of the script text (excl. padding)
 
-  // px the average line occupies, used to convert WPM → px/sec.
-  // Rough model: 1 line ≈ ~9 words; line height in px = fontSize * lineHeight.
+  function currentWordCount(): number {
+    const t = scriptBox?.value ?? "";
+    return t.trim() ? t.trim().split(/\s+/).length : 0;
+  }
+
+  // Scroll speed derived from the ACTUAL rendered text height and the reading
+  // time (wordCount / WPM). This guarantees the scroll covers exactly the whole
+  // script in exactly the estimated reading time — no fragile words-per-line
+  // guess that made short scripts race to the end instantly.
   function pxPerSecond(): number {
     const wpm = Number(speed?.value ?? 130);
-    const fontPx = Number(font?.value ?? 48);
-    const lineH = Number(lh?.value ?? 1.5);
-    const wordsPerLine = 9;
-    const linePx = fontPx * lineH;
-    const linesPerSec = wpm / wordsPerLine / 60;
-    return linesPerSec * linePx;
+    const words = currentWordCount();
+    if (words < 1 || textHeight < 1) return 40;
+    const totalSec = (words / wpm) * 60;
+    return Math.max(8, textHeight / Math.max(1, totalSec));
   }
 
   function applyTypography(): void {
@@ -127,15 +133,40 @@ export function initTeleprompter(): void {
   }
 
   // The track starts with its first line on the eyeline (≈42% down the stage),
-  // and we let it scroll until the last line passes the eyeline.
-  function recomputeBounds(): void {
-    if (!viewport || !track) return;
+  // and scrolls until the last line passes the eyeline. We measure the REAL
+  // rendered text height (via a marker) so pxPerSecond can pace the whole
+  // script across its reading time. Returns false if the stage isn't laid out
+  // yet (height 0) so callers can retry — this was the mobile "instant Done" bug.
+  function recomputeBounds(): boolean {
+    if (!viewport || !track) return false;
     const vpH = viewport.clientHeight;
+    if (vpH < 40) return false; // not laid out yet — caller should retry
     const startPad = vpH * 0.42;
     track.style.paddingTop = `${startPad}px`;
-    track.style.paddingBottom = `${vpH * 0.6}px`;
-    // total scrollable distance = track height - the portion already visible
-    maxOffset = Math.max(1, track.scrollHeight - vpH * 0.42 - vpH * 0.5);
+    track.style.paddingBottom = `${vpH * 0.55}px`;
+    // Real text height = full scrollHeight minus the top+bottom padding we added.
+    textHeight = Math.max(1, track.scrollHeight - startPad - vpH * 0.55);
+    // Scroll distance: move the whole text past the eyeline. The first line sits
+    // at startPad; we scroll until the text bottom reaches the eyeline.
+    maxOffset = Math.max(1, textHeight);
+    return true;
+  }
+
+  // Try to measure bounds, retrying across a few frames until layout settles.
+  // Mobile Safari frequently reports height 0 on the first 1-2 frames after a
+  // panel is un-hidden, which previously made the script "finish" instantly.
+  function recomputeBoundsWhenReady(cb?: () => void, tries = 0): void {
+    if (recomputeBounds()) {
+      cb?.();
+      return;
+    }
+    if (tries > 30) {
+      // give up gracefully — use a safe fallback so it still scrolls
+      maxOffset = Math.max(1, textHeight);
+      cb?.();
+      return;
+    }
+    requestAnimationFrame(() => recomputeBoundsWhenReady(cb, tries + 1));
   }
 
   function applyTransform(): void {
@@ -245,12 +276,23 @@ export function initTeleprompter(): void {
 
   // ---- view switching ----
   function showPrompter(): void {
+    // Guard: nothing to read → keep the user in the editor with a nudge.
+    if (currentWordCount() < 1) {
+      scriptBox?.focus();
+      scriptBox?.classList.add("ftp-shake");
+      setTimeout(() => scriptBox?.classList.remove("ftp-shake"), 500);
+      if (meta) meta.textContent = "Paste or type a script first ↑";
+      return;
+    }
     editor?.classList.add("hidden");
     prompter?.classList.remove("hidden");
     renderScript();
     applyTypography();
-    requestAnimationFrame(() => {
-      recomputeBounds();
+    endcard?.classList.add("hidden");
+    // Wait until the stage actually has a height (mobile Safari reports 0 for a
+    // frame or two after un-hiding) before measuring + starting — otherwise the
+    // scroll distance is wrong and the script "finishes" instantly.
+    recomputeBoundsWhenReady(() => {
       restart();
       startWithCountdown();
     });
