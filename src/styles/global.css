@@ -454,8 +454,16 @@ a {
    When the user pops the teleprompter into a floating window, the PiP doc's
    <html> gets the `.pip-mode` class (added by src/lib/teleprompter.ts). The
    MOVED element is the .ftp-stage wrapper itself, so these rules make it fill
-   the small detached window edge-to-edge. :where() keeps specificity at 0 so
-   inline JS sizing always wins.
+   the small detached window edge-to-edge.
+
+   🩸 The stage carries a BUILD-TIME inline `height: min(60vh, 520px)` (set in
+   app.astro for the page layout). In a 680px-tall PiP window 60vh = 408px wins,
+   so without an override the stage is only 408px inside a 680px window and the
+   leftover ~272px of black <body> shows as a dead void BELOW the text — looks
+   like "too much black fade at the bottom" but it's actually unfilled stage.
+   An inline style beats any non-!important rule (and :where() is specificity 0),
+   so the stage height MUST use !important to fill the float — exactly how
+   `.ftp-fauxscreen` above beats the same inline height for iOS faux-fullscreen.
 */
 :where(.pip-mode) body {
   margin: 0;
@@ -467,7 +475,9 @@ a {
 :where(.pip-mode) .ftp-stage {
   flex: 1 1 auto;
   width: 100vw;
-  height: 100vh;
+  /* !important beats the build-time inline `height: min(60vh, 520px)` so the
+     stage fills the whole float instead of leaving a black band below it. */
+  height: 100vh !important;
   border-radius: 0;
 }
 /* Hide the eyeline label chrome that doesn't fit a tiny window — keep the line. */
