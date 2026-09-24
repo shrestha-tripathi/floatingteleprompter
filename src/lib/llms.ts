@@ -19,7 +19,7 @@ export function llmsHeader(): string {
 > ${site.description}
 
 ## What it is
-A free browser-based teleprompter. Paste or type a script, pick a reading speed (60–300 words per minute, default 130) and press Start for an optional 3-2-1 countdown and smooth auto-scroll. "Float on top" pops the scrolling script into an always-on-top Document Picture-in-Picture window that sits over Zoom, Teams, Google Meet, OBS, Loom or any other app. Also: mirror mode for beam-splitter rigs, adjustable font size (24–96 px), line height and column width, fullscreen, keyboard shortcuts (Space play/pause, arrow keys speed, R restart, M mirror, P float, F fullscreen) and media-key control.
+A free browser-based teleprompter. Paste or type a script, pick a reading speed (60–300 words per minute, default 130) and press Start for an optional 3-2-1 countdown and smooth auto-scroll. "Float on top" pops the scrolling script into an always-on-top Document Picture-in-Picture window that sits over Zoom, Teams, Google Meet, OBS, Loom or any other app. Also: mirror mode for beam-splitter rigs, adjustable font size (24–96 px), line height and column width, fullscreen, keyboard shortcuts (Space play/pause, arrow keys speed, R restart, M mirror, P float, F fullscreen) and media-key control. WebMCP tools (load_script, set_speed, start_teleprompter, stop_teleprompter) are registered on /app when the browser supports navigator.modelContext.
 
 ## Privacy
 The script is stored only in the browser's localStorage and is never uploaded; there is no backend. The website uses Google Analytics and may show ads; the script is never part of that.
