@@ -30,6 +30,10 @@ export const faqs: { q: string; a: string }[] = [
     q: "How do I control the scroll speed?",
     a: "Use the Speed slider (measured in words per minute, default 130) or the up/down arrow keys while reading. You can also change font size, line height and column width live, and everything you set is remembered for next time.",
   },
+  {
+    q: "Can an AI agent control the teleprompter?",
+    a: "Yes — it's AI agent ready (WebMCP). In browsers that expose the experimental navigator.modelContext API, the app page registers four tools: load_script, set_speed, start_teleprompter and stop_teleprompter. They drive the same buttons and sliders you use; in other browsers nothing changes.",
+  },
 ];
 
 

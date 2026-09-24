@@ -49,6 +49,8 @@ function getDocPiP(): DocumentPiP | null {
     .documentPictureInPicture ?? null;
 }
 
+import { registerWebMcpTools, text as mcpText } from "./webmcp";
+
 export function initTeleprompter(): void {
   const editor = $("ftp-editor");
   const prompter = $("ftp-prompter");
@@ -840,4 +842,76 @@ export function initTeleprompter(): void {
   // Belt-and-suspenders for fullscreen on browsers where the observer is slow to
   // fire on the synchronous enter/exit.
   document.addEventListener("fullscreenchange", () => scheduleRemeasure());
+
+  // ---- WebMCP (progressive enhancement; no-op without navigator.modelContext) ----
+  // Tools only drive the existing UI/functions above — no duplicate logic.
+  const inPrompter = (): boolean => !!prompter && !prompter.classList.contains("hidden");
+  registerWebMcpTools([
+    {
+      name: "load_script",
+      description:
+        "Replace the teleprompter script with the given text (saved only in this browser's localStorage). Returns to the editor if currently reading.",
+      inputSchema: {
+        type: "object",
+        properties: { text: { type: "string", description: "The full script to read." } },
+        required: ["text"],
+      },
+      execute: async (args) => {
+        const t = typeof args.text === "string" ? args.text : "";
+        if (!t.trim()) return mcpText("No text provided; script unchanged.");
+        if (inPrompter()) showEditor();
+        scriptBox.value = t;
+        scriptBox.dispatchEvent(new Event("input", { bubbles: true }));
+        return mcpText(`Script loaded: ${meta?.textContent ?? ""}`.trim());
+      },
+    },
+    {
+      name: "set_speed",
+      description: "Set the scroll speed in words per minute (60–300, step 5). Applies live, even while scrolling.",
+      inputSchema: {
+        type: "object",
+        properties: { wpm: { type: "number", minimum: 60, maximum: 300 } },
+        required: ["wpm"],
+      },
+      execute: async (args) => {
+        const n = Number(args.wpm);
+        if (!speed || !Number.isFinite(n)) return mcpText("Invalid wpm.");
+        const v = Math.min(300, Math.max(60, Math.round(n / 5) * 5));
+        speed.value = String(v);
+        speed.dispatchEvent(new Event("input", { bubbles: true }));
+        return mcpText(`Speed set to ${v} WPM.`);
+      },
+    },
+    {
+      name: "start_teleprompter",
+      description:
+        "Start reading: opens the prompter view from the editor (with the 3-2-1 countdown if enabled), or resumes scrolling if paused. The floating always-on-top window needs a user click on 'Float on top' (browser rule).",
+      inputSchema: { type: "object", properties: {} },
+      execute: async () => {
+        if (currentWordCount() < 1) return mcpText("Script is empty — call load_script first.");
+        if (!inPrompter()) {
+          showPrompter();
+          return mcpText("Prompter opened; scrolling starts after the countdown (if enabled).");
+        }
+        play();
+        return mcpText("Scrolling resumed.");
+      },
+    },
+    {
+      name: "stop_teleprompter",
+      description: "Pause scrolling (keeps position). Pass return_to_editor=true to go back to the script editor.",
+      inputSchema: {
+        type: "object",
+        properties: { return_to_editor: { type: "boolean" } },
+      },
+      execute: async (args) => {
+        if (args.return_to_editor === true) {
+          showEditor();
+          return mcpText("Stopped and returned to the editor.");
+        }
+        pause();
+        return mcpText("Scrolling paused.");
+      },
+    },
+  ]);
 }
