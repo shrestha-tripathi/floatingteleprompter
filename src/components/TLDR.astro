@@ -1,0 +1,29 @@
+---
+/**
+ * Answer-first TL;DR block (GEO). 40–60 words: what it does, free, runs in the
+ * browser, and the key limit. Brand from site.config; freshness from site.lastUpdated.
+ */
+import { site, lastUpdatedLabel } from "../site.config";
+
+interface Props {
+  class?: string;
+}
+const { class: cls = "" } = Astro.props;
+---
+
+<aside
+  class={`rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4 ${cls}`}
+  aria-label="Summary"
+>
+  <p class="text-sm leading-relaxed text-[var(--color-fg-muted)]">
+    <b class="text-[var(--color-fg)]">TL;DR:</b>
+    {site.name} is a free online teleprompter that runs entirely in your browser:
+    paste a script, set the speed in words per minute, and it auto-scrolls. No
+    signup, no install, and your script stays on your device. Limit: the
+    always-on-top floating window needs desktop Chrome or Edge; other browsers
+    and phones get fullscreen instead.
+  </p>
+  <p class="mt-2 text-sm text-[var(--color-fg-muted)]">
+    Last updated <time datetime={site.lastUpdated}>{lastUpdatedLabel}</time>
+  </p>
+</aside>

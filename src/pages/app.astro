@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import { site } from "../site.config";
+import TLDR from "../components/TLDR.astro";
 
 // Indexable: this is the product / money page.
 const webAppSchema = {
@@ -11,8 +12,10 @@ const webAppSchema = {
   name: site.name,
   url: `${site.url}/app/`,
   applicationCategory: "MultimediaApplication",
-  operatingSystem: "Any (Chrome, Edge, Firefox, Safari)",
+  operatingSystem: "Any (web browser)",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  isAccessibleForFree: true,
+  dateModified: site.lastUpdated,
   publisher: { "@id": `${site.url}/#organization` },
 };
 ---
@@ -35,6 +38,7 @@ const webAppSchema = {
         <span class="text-[var(--color-fg)] font-medium">Float on top</span> of your
         recording app. Nothing is uploaded — your script never leaves this browser.
       </p>
+      <TLDR class="mt-5 mx-auto max-w-2xl text-left" />
     </header>
 
     {/* ============ EDITOR (shown before/while editing) ============ */}
