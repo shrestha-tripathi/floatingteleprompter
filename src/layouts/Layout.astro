@@ -23,11 +23,13 @@ interface Props {
   path?: string;
   /** Per-page JSON-LD blocks (WebApplication, FAQPage, …); appended to sitewide. */
   jsonLd?: Record<string, unknown>[];
+  /** Set false when the page supplies its own (deeper) BreadcrumbList. */
+  autoBreadcrumb?: boolean;
   /** When true, emit <meta name="robots" content="noindex"> (thin/app pages). */
   noindex?: boolean;
 }
 
-const { title, description, path, jsonLd = [], noindex = false } = Astro.props;
+const { title, description, path, jsonLd = [], noindex = false, autoBreadcrumb = true } = Astro.props;
 
 const pageTitle = title
   ? `${title} · ${site.name}`
@@ -73,7 +75,7 @@ const websiteSchema = {
 // (no title) where a single-item breadcrumb would be noise. Gives Google a
 // breadcrumb trail under the SERP title on every interior page.
 const breadcrumbSchema =
-  title && canonicalPath !== "/"
+  autoBreadcrumb && title && canonicalPath !== "/"
     ? {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",

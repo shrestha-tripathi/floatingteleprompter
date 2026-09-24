@@ -1,4 +1,5 @@
 import { site, absoluteUrl, lastUpdatedLabel } from "../site.config";
+import { pseo } from "../data/pseo";
 
 /**
  * llms.txt (llmstxt.org). Generated at build time so brand/domain come from
@@ -11,6 +12,8 @@ export const pages: { path: string; desc: string }[] = [
   { path: "/faq", desc: "FAQ: free, Zoom/OBS/Loom use, privacy, phones, mirror mode, offline, speed." },
   { path: "/about", desc: "About the project and its maker." },
   { path: "/privacy", desc: "Privacy policy." },
+  { path: "/guides", desc: "Index of setup guides for specific apps and devices." },
+  ...pseo.map((e) => ({ path: `/guides/${e.slug}`, desc: e.metaDescription })),
 ];
 
 export function llmsHeader(): string {
