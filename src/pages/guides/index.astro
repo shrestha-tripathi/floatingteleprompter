@@ -1,0 +1,47 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { site, absoluteUrl } from "../../site.config";
+import { pseo } from "../../data/pseo";
+
+const title = "Teleprompter Guides";
+const description = `Step-by-step guides for using ${site.name} with Zoom, Teams, Google Meet, OBS, Loom, YouTube and webinars, on Mac, Windows, iPad and Chromebook.`;
+const itemList = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  itemListElement: pseo.map((e, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: absoluteUrl(`/guides/${e.slug}`),
+    name: e.h1,
+  })),
+};
+---
+
+<Layout title={title} description={description} path="/guides" jsonLd={[itemList]}>
+  <Header />
+  <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <nav class="text-sm text-[var(--color-fg-subtle)]" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-fg)]">Home</a>
+      <span class="px-1.5">/</span>
+      <span class="text-[var(--color-fg-muted)]">Guides</span>
+    </nav>
+    <header class="mt-6">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Guides</h1>
+      <p class="mt-4 text-lg text-[var(--color-fg-muted)]">
+        Practical setups for reading a script on camera in the apps and devices you already use — including
+        what works where. Every guide uses the same free teleprompter that runs entirely in your browser.
+      </p>
+    </header>
+    <ul class="mt-10 grid gap-4 sm:grid-cols-2">
+      {pseo.map((e) => (
+        <li class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-5">
+          <a href={`/guides/${e.slug}/`} class="font-semibold text-[var(--color-fg)] hover:text-[var(--color-accent)]">{e.h1}</a>
+          <p class="mt-2 text-sm text-[var(--color-fg-muted)]">{e.metaDescription}</p>
+        </li>
+      ))}
+    </ul>
+  </main>
+  <Footer />
+</Layout>

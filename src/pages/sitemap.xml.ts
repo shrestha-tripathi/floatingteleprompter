@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { absoluteUrl } from "../site.config";
+import { pseo } from "../data/pseo";
 
 /**
  * Dynamic sitemap.
@@ -28,6 +29,8 @@ export const GET: APIRoute = async () => {
     { path: "/contact", priority: "0.5", changefreq: "yearly" },
     { path: "/privacy", priority: "0.3", changefreq: "yearly" },
     { path: "/terms", priority: "0.3", changefreq: "yearly" },
+    { path: "/guides", priority: "0.7", changefreq: "monthly" },
+    ...pseo.map((e) => ({ path: `/guides/${e.slug}`, priority: "0.6", changefreq: "monthly" })),
   ];
 
   const allPages = staticPages.map((p) => ({ ...p, lastmod: today }));
