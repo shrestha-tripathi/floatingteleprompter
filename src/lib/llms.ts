@@ -1,40 +1,71 @@
-import { site, absoluteUrl, lastUpdatedLabel } from "../site.config";
+import { site, absoluteUrl } from "../site.config";
 import { pseo } from "../data/pseo";
 
-/**
- * llms.txt (llmstxt.org). Generated at build time so brand/domain come from
- * site.config. Emitted as /llms.txt and /llms-full.txt.
- */
-export const pages: { path: string; desc: string }[] = [
-  { path: "/", desc: "Home — what the floating teleprompter does and where it works." },
-  { path: "/app", desc: "The teleprompter itself: paste a script, set WPM, play, float on top or go fullscreen." },
-  { path: "/how-it-works", desc: "How the floating window (Document Picture-in-Picture) and scroll engine work." },
-  { path: "/faq", desc: "FAQ: free, Zoom/OBS/Loom use, privacy, phones, mirror mode, offline, speed." },
-  { path: "/about", desc: "About the project and its maker." },
-  { path: "/privacy", desc: "Privacy policy." },
-  { path: "/guides", desc: "Index of setup guides for specific apps and devices." },
-  ...pseo.map((e) => ({ path: `/guides/${e.slug}`, desc: e.metaDescription })),
+/** Build-time, public documentation only. Never includes a visitor's script. */
+export const pages: { path: string; title: string; desc: string }[] = [
+  { path: "/", title: site.name, desc: "Free online teleprompter overview and browser compatibility." },
+  { path: "/app", title: "Open the teleprompter", desc: "Paste your script, start scrolling, then configure speed and float or use fullscreen." },
+  { path: "/how-it-works", title: "How to use the teleprompter", desc: "Setup, playback controls and the floating window." },
+  { path: "/faq", title: "Teleprompter questions and answers", desc: "Cost, privacy, browser support, mirror mode and offline limits." },
+  { path: "/guides", title: "Teleprompter setup guides", desc: "Guides for recording apps, meetings and devices." },
+  ...pseo.map((e) => ({ path: `/guides/${e.slug}`, title: e.h1, desc: e.metaDescription })),
+  { path: "/about", title: "About the project", desc: "The project, publisher and maker." },
+  { path: "/privacy", title: "Privacy policy", desc: "Local script storage, analytics and website privacy." },
+  { path: "/contact", title: "Contact", desc: "Contact the maker about the project." },
+  { path: "/terms", title: "Terms of use", desc: "Conditions for using the website." },
 ];
 
 export function llmsHeader(): string {
   return `# ${site.name}
 
-> ${site.description}
+> A free online teleprompter with adjustable auto-scroll and an always-on-top script window in supported desktop browsers. No account or script upload.
 
-## What it is
-A free browser-based teleprompter. Paste or type a script, pick a reading speed (60–300 words per minute, default 130) and press Start for an optional 3-2-1 countdown and smooth auto-scroll. "Float on top" pops the scrolling script into an always-on-top Document Picture-in-Picture window that sits over Zoom, Teams, Google Meet, OBS, Loom or any other app. Also: mirror mode for beam-splitter rigs, adjustable font size (24–96 px), line height and column width, fullscreen, keyboard shortcuts (Space play/pause, arrow keys speed, R restart, M mirror, P float, F fullscreen) and media-key control. WebMCP tools (load_script, set_speed, start_teleprompter, stop_teleprompter) are registered on /app when the browser supports navigator.modelContext.
+The product is at ${absoluteUrl("/app")}. It displays plain text; it does not record or export video. Use your own recording or meeting application alongside it.
 
-## Privacy
-The script is stored only in the browser's localStorage and is never uploaded; there is no backend. The website uses Google Analytics and may show ads; the script is never part of that.
+## Setup and controls
+Paste a script and press Start teleprompter. Scrolling starts after the optional countdown. Pause to configure speed, font size, line height, column width or mirror mode; then use Float on top or Fullscreen.
 
-## Limits
-- The floating always-on-top window requires Document Picture-in-Picture: desktop Chrome or Edge. Safari, Firefox, iPad, phones and other browsers get a fullscreen teleprompter instead.
-- No voice-tracking / speech-following scroll; speed is set by WPM and adjusted manually.
-- No file import or cloud sync; paste text in. Settings are remembered per browser.
-- Free, no signup. Last updated ${lastUpdatedLabel}.
+- Speed: 60 to 300 words per minute, default 130 WPM.
+- Font size: 24 to 96 pixels.
+- Space toggles playback. Arrow keys adjust speed. R resets position, M toggles mirror, P opens the floating window and F toggles fullscreen.
+- Keyboard shortcuts require focus in the teleprompter tab or floating script, not another app or a text field. Supported desktop browsers may route media play/pause while another app has focus; test this before recording.
+- The floating window contains the script. Configure settings in the main tab before floating or entering fullscreen.
+
+## Compatibility and limits
+- Float on top requires Document Picture-in-Picture in desktop Chrome or Edge. If unsupported, the Float button is hidden. Safari, Firefox, phones and iPad use in-page or fullscreen reading, not an overlay above other apps.
+- Fullscreen may use a browser-viewport fallback on mobile; it does not turn the page into a system-wide overlay.
+- Scrolling is manual-speed, not voice-tracking or speech-following.
+- No file import, cloud sync, video recording or built-in AI script generation. Paste plain text.
+- The already-loaded app can keep scrolling without a connection. Offline reloads or navigation are not guaranteed.
+- When screen sharing, select the intended tab or window and verify the audience preview or a test recording. Do not assume the floating script is excluded from every capture method.
+
+## Privacy and pricing
+The app is free with no signup, credit card or watermark. Scripts and settings are saved in this browser's localStorage when storage is available, never uploaded or synced. Clearing site data removes saved drafts. The website uses Google Analytics and may show ads; a visitor's script is not included in this documentation or analytics.
+
+## AI agent integration
+On ${absoluteUrl("/app")}, browsers exposing navigator.modelContext can discover WebMCP tools: load_script, set_speed, start_teleprompter and stop_teleprompter. They control the existing app. This integration is browser-dependent and separate from this static documentation.
 `;
 }
 
-export function pageList(extra: { path: string; desc: string }[] = []): string {
-  return [...pages, ...extra].map((p) => `- [${p.path}](${absoluteUrl(p.path)}): ${p.desc}`).join("\n");
+export function pageList(): string {
+  return pages.map((p) => `- [${p.title}](${absoluteUrl(p.path)}): ${p.desc}`).join("\n");
+}
+
+export function guideText(): string {
+  return pseo.map((e) => `## ${e.h1}
+Source: ${absoluteUrl(`/guides/${e.slug}`)}
+
+${e.intro}
+
+### Setup
+${e.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+
+### Tips
+${e.tips.map((t) => `- ${t}`).join("\n")}
+
+### Questions and answers
+${e.faqs.map((f) => `#### ${f.q}\n${f.a}`).join("\n\n")}
+
+Related guides:
+${e.related.map((s) => pages.find((p) => p.path === `/guides/${s}`)).filter((p): p is typeof pages[number] => Boolean(p)).map((p) => `- [${p.title}](${absoluteUrl(p.path)})`).join("\n")}`).join("\n\n");
 }

@@ -9,7 +9,7 @@ export const GET: APIRoute = () => {
 ${pageList()}
 
 ## Optional
-- [llms-full.txt](${site.url}/llms-full.txt): this file plus every FAQ answer inlined.
+- [llms-full.txt](${site.url}/llms-full.txt): Expanded documentation with general FAQs and every guide’s setup, tips and answers.
 
 ## Publisher
 ${site.publisherName} — ${site.publisherUrl}

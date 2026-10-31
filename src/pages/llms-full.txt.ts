@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { site } from "../site.config";
 import { faqs } from "../data/faqs";
-import { llmsHeader, pageList } from "../lib/llms";
+import { llmsHeader, pageList, guideText } from "../lib/llms";
 
 /** /llms-full.txt — llms.txt plus every FAQ answer inlined. */
 export const GET: APIRoute = () => {
@@ -12,6 +12,8 @@ ${pageList()}
 
 ## FAQ
 ${faqText}
+
+${guideText()}
 
 ## Publisher
 ${site.publisherName} — ${site.publisherUrl}

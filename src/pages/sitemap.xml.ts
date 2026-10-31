@@ -18,7 +18,7 @@ import { pseo } from "../data/pseo";
  *   0.3  — legal documents (privacy, terms) — trust signals, not SEO targets
  */
 export const GET: APIRoute = async () => {
-  const today = new Date().toISOString().slice(0, 10);
+  // No synthetic lastmod: rebuilding is not evidence that a page changed.
 
   const staticPages = [
     { path: "/", priority: "1.0", changefreq: "weekly" },
@@ -33,7 +33,7 @@ export const GET: APIRoute = async () => {
     ...pseo.map((e) => ({ path: `/guides/${e.slug}`, priority: "0.6", changefreq: "monthly" })),
   ];
 
-  const allPages = staticPages.map((p) => ({ ...p, lastmod: today }));
+  const allPages = staticPages;
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -41,7 +41,6 @@ ${allPages
   .map(
     (p) => `  <url>
     <loc>${absoluteUrl(p.path)}</loc>
-    <lastmod>${p.lastmod}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`,

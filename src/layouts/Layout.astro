@@ -104,6 +104,7 @@ const allJsonLd = [
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" type="text/plain" href={absoluteUrl("/llms.txt")} title={`${site.name}: AI-readable documentation`} />
     {noindex && <meta name="robots" content="noindex" />}
 
     {/* Open Graph / Twitter */}
