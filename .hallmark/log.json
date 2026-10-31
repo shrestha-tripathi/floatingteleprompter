@@ -1,0 +1,35 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "theme": "brand",
+  "shape": "product-led homepage",
+  "axes": {"tone":"light and dark","type":"system sans","hue":"orange"},
+  "fingerprint": {"entry":"product screenshot","geometry":"split columns","scroll":"static","spacing":"alternating surfaces","navigation":"compact header","close":"app launch"},
+  "hero": "Stage",
+  "nav": "existing compact wordmark and action",
+  "footer": "existing product links",
+  "imagery": "actual product screenshot",
+  "photos": [],
+  "entry": "src/pages/index.astro",
+  "signature": "real teleprompter eyeline and playback controls",
+  "sections": [
+   "hero",
+   "setup",
+   "guide links",
+   "local script storage",
+   "questions",
+   "launch"
+  ],
+  "waived": [],
+  "prompt": "Improve acquisition and AEO without changing teleprompter functionality",
+  "review": {
+   "floor_fail": 0,
+   "reflex_open": 0,
+   "code": "passed after touch-instruction correction",
+   "visual": "three findings resolved"
+  },
+  "date": "2026-10-31"
+ }
+]

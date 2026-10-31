@@ -3,267 +3,105 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { site } from "../site.config";
-import TLDR from "../components/TLDR.astro";
+import { pseoBySlug } from "../data/pseo";
+import "../styles/marketing.css";
 
-// WebApplication schema — tells Google this URL is a usable web app, not just
-// marketing. Eligible for software-app rich results. MultimediaApplication +
-// free offer per the spec.
 const webAppSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "@id": `${site.url}/#webapp`,
   name: site.name,
-  alternateName: ["Online Teleprompter", "Floating teleprompter for recording"],
-  url: site.url,
+  alternateName: ["Free online teleprompter", "Always-on-top teleprompter"],
+  url: `${site.url}/app/`,
   description: site.description,
   applicationCategory: "MultimediaApplication",
-  operatingSystem: "Any (web browser)",
-  browserRequirements: "Requires a modern browser",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-  },
-  featureList: [
-    "Floats over OBS, Zoom, Loom and any recording app (Document Picture-in-Picture)",
-    "Auto-scrolling script at adjustable WPM",
-    "Mirror mode for beam-splitter teleprompter rigs",
-    "Adjustable font size, speed, line height and column width",
-    "Keyboard shortcuts and 3-2-1 countdown",
-    "Works offline — nothing is uploaded",
-    "Free, no signup, no install",
-  ],
+  operatingSystem: "Windows, macOS, Linux, iOS, Android (web browser)",
+  browserRequirements: "Floating window requires desktop Chrome or Edge. Other browsers use the in-page or fullscreen teleprompter.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  featureList: ["Always-on-top script in desktop Chrome and Edge", "Adjustable auto-scroll from 60 to 300 WPM", "Mirror mode for teleprompter rigs", "Adjustable font size, line height and column width", "Keyboard shortcuts and optional countdown", "Local script storage, no script uploads"],
   isAccessibleForFree: true,
-  dateModified: site.lastUpdated,
   publisher: { "@id": `${site.url}/#organization` },
 };
-
-const features = [
-  {
-    title: "Floats over any app",
-    body: "The killer feature: pop the scrolling script into a small always-on-top window that sits over OBS, Zoom, Loom or CapCut while you record. Read your lines while looking straight at the camera.",
-    // Lucide "picture-in-picture-2"
-    icon: `<path d="M2 7V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7"/><path d="M10 19H4a2 2 0 0 1-2-2v-2"/><rect x="2" y="13" width="10" height="8" rx="2"/>`,
-  },
-  {
-    title: "Free forever",
-    body: "No premium tier, no watermark, no credit card. The whole tool runs as static files in your browser, so there is nothing for us to meter or charge for.",
-    // Lucide "badge-dollar-sign"
-    icon: `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>`,
-  },
-  {
-    title: "No signup",
-    body: "Open the page and start reading. No account, no email, no onboarding flow standing between you and your recording.",
-    // Lucide "zap"
-    icon: `<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>`,
-  },
-  {
-    title: "Mirror mode for rigs",
-    body: "Flip the text horizontally for beam-splitter teleprompter hardware that reflects the script off angled glass — the mirrored text reads perfectly in the reflection.",
-    // Lucide "flip-horizontal-2"
-    icon: `<path d="m3 7 5 5-5 5V7"/><path d="m21 7-5 5 5 5V7"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/>`,
-  },
-  {
-    title: "Works offline",
-    body: "Once the page is loaded you can pull the plug. The scroll engine, your script and every setting live entirely in your browser — perfect for recording on the road.",
-    // Lucide "wifi-off"
-    icon: `<path d="M12 20h.01"/><path d="M8.5 16.42a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 4.17-2.65"/><path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76"/><path d="M16.85 11.25a10 10 0 0 1 2.22 1.68"/><path d="M5 13a10 10 0 0 1 5.24-2.76"/><line x1="2" x2="22" y1="2" y2="22"/>`,
-  },
-  {
-    title: "Nothing uploaded",
-    body: "Your script never leaves your device. It lives in your browser's local storage — there is no server to send it to, no draft sitting in someone's database. (The website itself uses analytics cookies and may show ads; your script is never part of that.)",
-    // Lucide "shield-check"
-    icon: `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>`,
-  },
+const workflows = [
+  { slug: "teleprompter-for-zoom", label: "Zoom", detail: "Keep your talking points beside the camera." },
+  { slug: "teleprompter-for-obs", label: "OBS", detail: "Choose a capture source that excludes your script." },
+  { slug: "teleprompter-for-loom", label: "Loom", detail: "Read your walkthrough while recording your screen." },
 ];
-
-const steps = [
-  {
-    n: "1",
-    title: "Paste your script",
-    body: "Drop your talking-head script into the box. Word count and an estimated read time appear instantly, and your text is saved in your browser so it survives a refresh.",
-  },
-  {
-    n: "2",
-    title: "Click \u201cFloat on top\u201d",
-    body: "The scrolling script pops into a small floating window. Drag it over your OBS / Zoom / Loom recording window — it stays on top of everything.",
-  },
-  {
-    n: "3",
-    title: "Record looking at the camera",
-    body: "Position the floating window right under your webcam and read. Your eyes stay on the lens, so you connect with viewers instead of reading off to the side.",
-  },
-];
+const devices = [
+  { slug: "teleprompter-on-mac", label: "Mac" },
+  { slug: "teleprompter-on-windows", label: "Windows" },
+  { slug: "teleprompter-on-ipad", label: "iPad" },
+  { slug: "teleprompter-on-chromebook", label: "Chromebook" },
+].filter((d) => pseoBySlug.has(d.slug));
 ---
 
-<Layout
-  title="Free Online Teleprompter That Floats Over Any App"
-  description={site.description}
-  jsonLd={[webAppSchema]}
->
-  <Header />
-
-  <main>
-    <!-- HERO -->
-    <section class="border-b border-[var(--color-border)]">
-      <div class="mx-auto max-w-[1200px] px-6 md:px-12 py-20 md:py-28">
-        <p class="text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">
-          Teleprompter · Floats over OBS, Zoom &amp; Loom · No install
-        </p>
-        <h1 class="mt-4 text-5xl md:text-7xl font-semibold tracking-tight max-w-4xl">
-          A teleprompter that floats
-          <span class="text-[var(--color-accent)]"> on top of any app.</span>
-        </h1>
-        <p class="mt-6 max-w-2xl text-lg md:text-xl text-[var(--color-fg-muted)]">
-          Record talking-head videos over OBS, Zoom, Loom or CapCut while reading
-          your script in a small always-on-top window. No install, free, and your
-          script never leaves your browser.
-        </p>
-        <TLDR class="mt-8 max-w-2xl" />
-        <div class="mt-10 flex flex-wrap gap-3">
-          <a
-            href="/app/"
-            class="inline-flex h-12 items-center rounded-lg bg-[var(--color-accent)] px-6 text-sm font-semibold text-[var(--color-accent-fg)] no-underline transition-opacity hover:opacity-90"
-          >
-            Open the teleprompter →
-          </a>
-          <a
-            href="/how-it-works/"
-            class="inline-flex h-12 items-center rounded-lg border border-[var(--color-border)] px-6 text-sm font-medium text-[var(--color-fg)] no-underline transition-colors hover:bg-[var(--color-bg-muted)]"
-          >
-            How it works
-          </a>
+<Layout title="Free Online Teleprompter" description="Free online teleprompter with a floating script window for desktop Chrome and Edge. Read over Zoom, OBS or Loom. No signup; your script stays on your device." jsonLd={[webAppSchema]}>
+  <Header compact />
+  <main class="marketing-home" id="main-content">
+    <section class="mk-hero">
+      <div class="mk-container mk-hero-grid">
+        <div class="mk-hero-copy">
+          <h1>Free teleprompter.<br />Always on top.</h1>
+          <p>Read your script over Zoom, OBS or Loom while you record.</p>
+          <div class="mk-actions">
+            <a class="mk-button" href="/app/">Open the teleprompter</a>
+            <a class="mk-link" href="/how-it-works/">How it works</a>
+          </div>
+          <p class="mk-compat">No signup or install. Float on desktop Chrome and Edge.<br />On other browsers, use fullscreen.</p>
         </div>
-        <div class="mt-10 flex flex-wrap gap-2.5">
-          {[
-            "Floats over any app",
-            "Free forever",
-            "No signup",
-            "Mirror mode for rigs",
-            "Works offline",
-            "Nothing uploaded",
-          ].map((chip) => (
-            <span class="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3.5 py-2 text-sm text-[var(--color-fg)]">
-              <svg class="size-4 text-[var(--color-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              {chip}
-            </span>
-          ))}
+        <figure class="mk-product">
+          <img src="/images/teleprompter-preview.webp" width="1036" height="759" alt="The teleprompter paused with a sample script, an eyeline guide, playback controls and adjustable speed." fetchpriority="high" decoding="async" />
+          <figcaption>The actual teleprompter, paused and ready to record.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="mk-section mk-setup" aria-labelledby="setup-title">
+      <div class="mk-container">
+        <h2 id="setup-title">From script to first take</h2>
+        <ol class="mk-steps">
+          <li><h3>Paste your script</h3><p>Press Start for a countdown and auto-scroll.</p></li>
+          <li><h3>Find your pace</h3><p>Pause to adjust speed, text size and width.</p></li>
+          <li><h3>Float and record</h3><p>Float on top, position near your webcam and resume.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="mk-section" aria-labelledby="workflow-title">
+      <div class="mk-container">
+        <div class="mk-heading-row"><h2 id="workflow-title">Teleprompter setup guides</h2><a class="mk-link" href="/guides/">All teleprompter guides</a></div>
+        <div class="mk-workflows">
+          {workflows.map((w) => <a href={`/guides/${w.slug}/`} class="mk-workflow"><h3>Teleprompter for {w.label}</h3><p>{w.detail}</p><span class="mk-link">Read the setup guide</span></a>)}
         </div>
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section class="border-b border-[var(--color-border)]">
-      <div class="mx-auto max-w-[1200px] px-6 md:px-12 py-16 md:py-24">
-        <div class="max-w-2xl">
-          <p class="text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">
-            How it works
-          </p>
-          <h2 class="mt-3 text-3xl md:text-5xl font-semibold tracking-tight">
-            Three steps. Eyes on the camera.
-          </h2>
-          <p class="mt-5 text-lg text-[var(--color-fg-muted)]">
-            No rig required — though it supports one. Just paste, float, and read.
-          </p>
-        </div>
-        <div class="mt-12 grid gap-px bg-[var(--color-border)] md:grid-cols-3 border border-[var(--color-border)] rounded-lg overflow-hidden">
-          {steps.map((s) => (
-            <div class="bg-[var(--color-bg)] p-6 md:p-8">
-              <div class="flex size-9 items-center justify-center rounded-full bg-[var(--color-accent)] text-base font-bold text-[var(--color-accent-fg)]">
-                {s.n}
-              </div>
-              <h3 class="mt-4 text-lg font-semibold">{s.title}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-[var(--color-fg-muted)]">{s.body}</p>
-            </div>
-          ))}
-        </div>
-        <p class="mt-6 text-sm text-[var(--color-fg-subtle)]">
-          The floating window uses Document Picture-in-Picture (Chrome &amp; Edge on
-          desktop). On other browsers and phones, a one-tap Fullscreen mode is the
-          fallback — the teleprompter still scrolls everywhere.
-        </p>
+    <section class="mk-section mk-privacy" aria-labelledby="privacy-title">
+      <div class="mk-container mk-split">
+        <h2 id="privacy-title">Your words.<br />Your browser.</h2>
+        <div class="mk-prose"><p>No script upload. Your draft stays in this browser when storage is available.</p><p>The loaded app scrolls offline. Mirror mode supports beam-splitter rigs.</p><a class="mk-link" href="/privacy/">Read the privacy policy</a></div>
       </div>
     </section>
 
-    <!-- FEATURE GRID -->
-    <section class="border-b border-[var(--color-border)]">
-      <div class="mx-auto max-w-[1200px] px-6 md:px-12 py-16 md:py-24">
-        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight max-w-3xl">
-          Built for creators who record themselves —
-          <span class="text-[var(--color-fg-muted)]">and value their privacy.</span>
-        </h2>
-        <div class="mt-12 grid gap-px bg-[var(--color-border)] sm:grid-cols-2 lg:grid-cols-3 border border-[var(--color-border)] rounded-lg overflow-hidden">
-          {features.map((f) => (
-            <div class="bg-[var(--color-bg)] p-6 md:p-8">
-              <div class="flex items-center gap-3">
-                <span
-                  class="inline-flex items-center justify-center size-9 rounded-md text-[var(--color-accent)] shrink-0"
-                  style="background-color: color-mix(in srgb, var(--color-accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);"
-                  aria-hidden="true"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={f.icon} />
-                </span>
-                <h3 class="text-lg font-semibold">{f.title}</h3>
-              </div>
-              <p class="mt-3 text-[var(--color-fg-muted)] text-sm leading-relaxed">{f.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ TEASER -->
-    <section class="border-b border-[var(--color-border)]">
-      <div class="mx-auto max-w-[1200px] px-6 md:px-12 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-start">
-        <div>
-          <p class="text-sm uppercase tracking-[0.06em] text-[var(--color-fg-subtle)]">Questions</p>
-          <h2 class="mt-3 text-3xl md:text-4xl font-semibold tracking-tight">
-            The short answers
-          </h2>
-          <a href="/faq/" class="mt-8 inline-flex h-10 items-center rounded-md border border-[var(--color-border)] px-4 text-sm font-medium text-[var(--color-fg)] no-underline transition-colors hover:bg-[var(--color-bg-muted)]">
-            Read the full FAQ →
-          </a>
-        </div>
-        <dl class="space-y-6">
-          <div>
-            <dt class="font-semibold text-[var(--color-fg)]">Is it free?</dt>
-            <dd class="mt-1 text-[var(--color-fg-muted)]">Yes — completely free, no signup, no watermark.</dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-[var(--color-fg)]">Does it work over Zoom or OBS?</dt>
-            <dd class="mt-1 text-[var(--color-fg-muted)]">Yes. The floating window stays on top of any recording or meeting app on desktop Chrome and Edge.</dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-[var(--color-fg)]">Does my script get uploaded?</dt>
-            <dd class="mt-1 text-[var(--color-fg-muted)]">Never. Everything runs in your browser; your script is stored only on your device.</dd>
-          </div>
-          <div>
-            <dt class="font-semibold text-[var(--color-fg)]">Can I use it on my phone?</dt>
-            <dd class="mt-1 text-[var(--color-fg-muted)]">Yes — it scrolls inline with a Fullscreen mode. (The floating window is a desktop-only feature.)</dd>
-          </div>
+    <section class="mk-section" aria-labelledby="answers-title">
+      <div class="mk-container mk-split">
+        <div><h2 id="answers-title">Teleprompter questions, answered</h2><a class="mk-link mk-faq-link" href="/faq/">Read the full FAQ</a></div>
+        <dl class="mk-answers">
+          <div><dt>Is it free?</dt><dd>Yes. No signup or watermark.</dd></div>
+          <div><dt>Will others see my script?</dt><dd>Share a specific window or tab. Verify the recording first.</dd></div>
+          <div><dt>Does it follow my voice?</dt><dd>No. You control the speed.</dd></div>
+          <div><dt>Can I use it on my phone?</dt><dd>Yes. Use fullscreen, not a floating window.</dd></div>
         </dl>
       </div>
     </section>
 
-    <!-- CTA -->
-    <section>
-      <div class="mx-auto max-w-[1200px] px-6 md:px-12 py-20 md:py-28 text-center">
-        <h2 class="text-4xl md:text-6xl font-semibold tracking-tight">Stop glancing away. Read to the lens.</h2>
-        <p class="mt-5 text-lg text-[var(--color-fg-muted)] max-w-xl mx-auto">
-          Paste your script, hit Float on top, and record a confident take with your
-          eyes right on the camera. Free, private, no install.
-        </p>
-        <a
-          href="/app/"
-          class="mt-10 inline-flex h-12 items-center rounded-lg bg-[var(--color-accent)] px-8 text-sm font-semibold text-[var(--color-accent-fg)] no-underline transition-opacity hover:opacity-90"
-        >
-          Open the teleprompter →
-        </a>
+    <section class="mk-section mk-close" aria-labelledby="start-title">
+      <div class="mk-container">
+        <h2 id="start-title">Keep the script.<br />Lose the second screen.</h2>
+        <a class="mk-button" href="/app/">Open the teleprompter</a>
+        <nav class="mk-devices" aria-label="Device setup guides">{devices.map((d) => <a class="mk-link" href={`/guides/${d.slug}/`}>Teleprompter on {d.label}</a>)}</nav>
       </div>
     </section>
   </main>
-
   <Footer />
 </Layout>

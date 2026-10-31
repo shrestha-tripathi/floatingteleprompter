@@ -1,0 +1,30 @@
+{
+  "scope": "homepage marketing and public SEO/AEO documentation; no app functionality changes",
+  "brand": {
+    "source": "src/styles/global.css:21-67",
+    "palette": "existing orange, neutral light and dark",
+    "fonts": "existing local system fonts"
+  },
+  "preserved": [
+    "src/lib/teleprompter.ts",
+    "src/lib/webmcp.ts",
+    "src/pages/app.astro",
+    "src/styles/global.css",
+    "all existing page routes and original link destinations"
+  ],
+  "introduced": [
+    "homepage-only marketing stylesheet",
+    "actual app screenshot with generic sample text",
+    "grouped guide hub and direct homepage guide links",
+    "expanded public llms-full.txt content",
+    "standard-library built SEO verifier"
+  ],
+  "facts_source": [
+    "src/pages/app.astro:44-166",
+    "src/lib/teleprompter.ts",
+    "src/lib/webmcp.ts",
+    "src/site.config.ts"
+  ],
+  "material": "actual app screenshot; no quotes, logos or metrics invented",
+  "review": "fresh independent code and visual reviewers; identified issues corrected"
+}
