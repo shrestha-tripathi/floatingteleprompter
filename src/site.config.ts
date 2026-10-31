@@ -70,7 +70,7 @@ export const site = {
    * Content freshness — ONE constant drives the visible "Last updated" line
    * and JSON-LD `dateModified`. Bump when landing-page content changes.
    */
-  lastUpdated: "2026-09-24",
+  lastUpdated: "2026-10-31",
 } as const;
 
 /** "September 2026" — human form of site.lastUpdated. */

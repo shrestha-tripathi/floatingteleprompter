@@ -27,25 +27,25 @@ export const pseoA: PseoEntry[] = [
     metaDescription:
       "Read a script during a Zoom call without looking away: a free browser teleprompter that floats on top of the Zoom window. No install, script stays on your device.",
     intro:
-      "Zoom has no built-in teleprompter, and reading notes from a second window makes your eyes drift away from the camera. This guide shows how to float a scrolling script in a small always-on-top window right under your webcam so you can present on Zoom while still looking at people.",
+      "Reading notes from a separate document during a Zoom call can make your eyes drift away from the camera. This guide shows how to float a scrolling script in a small always-on-top window right under your webcam so you can present on Zoom while still looking at people.",
     steps: [
       "Open the teleprompter in desktop Chrome or Edge and paste your talking points or full script.",
-      "Set Speed to roughly your speaking pace — 130 WPM is the default; conversational presenters often sit between 120 and 150.",
-      "Press Start, then click \"Float on top\" (or press P). The script moves into a small floating window.",
+      "Press Start to reveal the controls. Pause after the countdown, then set Speed to your speaking pace; 130 WPM is the default.",
+      "Click \"Float on top\" (or press P) to move the script into a small window, then press Space while it has focus to resume.",
       "Join or start your Zoom meeting and drag the floating window to the top-centre of your screen, just below the webcam.",
       "Shrink the column width and bump the font size so only a few words per line sit near the lens.",
-      "Use Space to pause when someone interrupts, and the up/down arrow keys to nudge speed by 10 WPM.",
+      "Click the floating script before using Space to pause or the arrow keys to adjust speed. These shortcuts do not work while Zoom has focus.",
     ],
     tips: [
       "If you share your screen, share a specific window (e.g. your slides) rather than your entire screen — otherwise participants may see the floating script.",
       "Zoom's self-view can compete for the same spot near the camera; hide self-view or move it to the side.",
       "Keep the script in short paragraphs; line breaks give you natural pause points during Q&A.",
-      "Once you click into Zoom the teleprompter tab loses keyboard focus — the app arms your keyboard's media play/pause key so you can still pause without clicking back.",
+      "When Zoom has focus, supported desktop browsers may respond to media play/pause. Test it before a call; click the script if media keys are unavailable.",
     ],
     faqs: [
       {
         q: "Will Zoom participants see my teleprompter?",
-        a: "Not through your camera. They could see it only if you share your entire screen; sharing a single window or application keeps the floating script private.",
+        a: "Your camera does not capture an on-screen script. Screen sharing can: select the intended window or tab and verify the audience preview before presenting.",
       },
       {
         q: "Do I need a Zoom plugin or app?",
@@ -69,10 +69,10 @@ export const pseoA: PseoEntry[] = [
     steps: [
       "Open the teleprompter in Chrome or Edge (Edge ships with Windows, so it's usually already there).",
       "Paste your script and check the estimated read time under the text box against your agenda slot.",
-      "Press Start and click \"Float on top\" to pop the script into its own always-on-top window.",
+      "Press Start, pause after the countdown and adjust your settings. Click \"Float on top\" to move the script into its own window.",
       "Open the Teams meeting and position the floating window near the top of the screen under your camera.",
-      "Turn off the 3-2-1 countdown if you want scrolling to begin the instant you press Play.",
-      "When you're done speaking, press Space to pause or close the floating window to return it to the tab.",
+      "The 3-2-1 countdown applies only when starting a new run. Turn it off before a new run if you want scrolling to begin immediately; ordinary Play or Space resume does not repeat the countdown.",
+      "Click the floating script and press Space to pause or resume. Close the floating window to return it to the tab.",
     ],
     tips: [
       "In Teams, share a window or a PowerPoint Live presentation rather than your whole desktop so the script isn't visible to attendees.",
@@ -106,8 +106,8 @@ export const pseoA: PseoEntry[] = [
       "Google Meet lives in a browser tab, which makes a second tab for your notes awkward: switching tabs hides the meeting. A floating teleprompter solves that — the script sits in its own always-on-top window, so Meet and your notes are visible at the same time.",
     steps: [
       "In Chrome, open the teleprompter in a new tab next to your Meet tab.",
-      "Paste your script and set Speed and Font size.",
-      "Press Start, then \"Float on top\" — the script jumps into a small window that stays above every tab.",
+      "Paste your script, press Start and pause after the countdown. Then set Speed and Font size.",
+      "Click \"Float on top\" to move the script into a small window. With that window focused, press Space to resume.",
       "Switch back to the Meet tab; the floating script stays put. Drag it under your webcam.",
       "Resize the floating window by dragging its edge — the scroll re-measures automatically.",
     ],
@@ -128,7 +128,7 @@ export const pseoA: PseoEntry[] = [
       },
       {
         q: "Can other people in the Meet see the script?",
-        a: "Only if you share your entire screen. Your webcam doesn't capture it, and sharing a single tab keeps it hidden.",
+        a: "Your webcam does not capture the on-screen script, but screen sharing might. Select the intended tab or window and check the audience preview.",
       },
     ],
     related: ["teleprompter-for-zoom", "teleprompter-on-chromebook", "teleprompter-for-webinars"],
@@ -144,9 +144,9 @@ export const pseoA: PseoEntry[] = [
     steps: [
       "Write your script with one idea per paragraph; the gap between paragraphs becomes a natural breath.",
       "Paste it into the teleprompter and check the estimated duration shown under the box.",
-      "Pick a speed: start near 130–150 WPM for energetic YouTube delivery, then adjust after a test take.",
-      "Webcam recording: press Start, click \"Float on top\" and drag the window just under the lens while your recorder runs.",
-      "Camera + beam-splitter rig: open the prompter on the tablet or monitor in the rig, press M for mirror mode and F for fullscreen.",
+      "Press Start, pause after the countdown, then choose a speed. Try 130 WPM and adjust after a test take.",
+      "For webcam recording, click \"Float on top\", place it near the lens and press Space while the script has focus to resume.",
+      "For a camera with a beam-splitter rig, enable Mirror before entering Fullscreen. On touch devices, exit fullscreen to access settings and playback controls.",
       "Use R to restart for a retake — it jumps back to the top without leaving the prompter.",
     ],
     tips: [
@@ -182,20 +182,20 @@ export const pseoA: PseoEntry[] = [
     steps: [
       "Open the teleprompter in desktop Chrome or Edge and paste your script.",
       "In OBS, build your scene with a Video Capture Device (your webcam) and, if needed, a Window Capture of the app you're demoing.",
-      "Back in the teleprompter, press Start then \"Float on top\".",
+      "Back in the teleprompter, press Start and pause after the countdown. Adjust your settings, then click \"Float on top\".",
       "Drag the floating window under your webcam; it stays above OBS even when OBS has focus.",
-      "Start recording or streaming in OBS, and use your keyboard's media play/pause key to pause the script without leaving OBS.",
+      "Resume with the floating script focused, then start recording in OBS. Test media play/pause before relying on it while OBS has focus.",
     ],
     tips: [
       "Avoid a Display Capture of the whole monitor if the floating window sits on it — use Window Capture for the specific app instead.",
-      "If you stream, set a hotkey-free workflow: the media play/pause key controls the teleprompter even while OBS has focus.",
+      "Keyboard shortcuts require focus in the floating script. Media play/pause may work while OBS has focus on supported desktop browsers; verify this before streaming.",
       "On a multi-monitor setup, put OBS on the second screen and the floating script on the screen with the webcam.",
       "Match the font size to your distance from the screen — larger text lets you sit back from the camera.",
     ],
     faqs: [
       {
         q: "Will OBS capture the teleprompter?",
-        a: "Only if a Display Capture source includes the part of the screen where the floating window sits. Webcam and Window Capture sources won't show it.",
+        a: "Display Capture can include the floating script. Prefer a camera-only scene or a capture of the intended app, then make a short test recording to confirm what OBS captures.",
       },
       {
         q: "Is this an OBS plugin or browser source?",
@@ -218,14 +218,14 @@ export const pseoA: PseoEntry[] = [
       "Loom videos are meant to feel quick and personal, but rambling costs viewers time. Reading a short script from a floating window keeps the video tight while your face stays in Loom's camera bubble looking at the lens.",
     steps: [
       "Draft a short script — most Loom walkthroughs work best at a few hundred words.",
-      "Paste it into the teleprompter in Chrome or Edge and press Start, then \"Float on top\".",
+      "Paste it into the teleprompter in Chrome or Edge. Press Start, pause after the countdown, configure your settings and click \"Float on top\".",
       "Open Loom and choose \"Window\" or a specific tab as the recording source rather than the full screen.",
       "Place the floating script near the top of the screen, close to where Loom's camera bubble and your webcam are.",
-      "Hit record in Loom; pause the script with your media play/pause key if you need to click around.",
+      "Resume in the focused script, then record in Loom. Test media play/pause first if you want to pause without clicking back to the script.",
     ],
     tips: [
       "If you record the full screen in Loom, the floating window will appear in the video — record a single window or tab to keep it out.",
-      "Write the script around what you'll click so the scroll and the demo stay in sync; pause with Space at each click.",
+      "Write the script around your clicks. Click the teleprompter before using Space to pause; Space is not a global shortcut.",
       "A slower speed (around 110–120 WPM) helps when you're narrating and operating the UI at the same time.",
     ],
     faqs: [
@@ -235,7 +235,7 @@ export const pseoA: PseoEntry[] = [
       },
       {
         q: "Will the teleprompter show up in my Loom?",
-        a: "Only when Loom records your full screen. Recording a single window or tab keeps the floating script off the video.",
+        a: "Full-screen recording can include the script. Choose the intended window or tab and verify a short test recording before relying on exclusion.",
       },
       {
         q: "Is my script shared with Loom?",

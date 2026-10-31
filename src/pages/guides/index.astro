@@ -5,43 +5,41 @@ import Footer from "../../components/Footer.astro";
 import { site, absoluteUrl } from "../../site.config";
 import { pseo } from "../../data/pseo";
 
-const title = "Teleprompter Guides";
-const description = `Step-by-step guides for using ${site.name} with Zoom, Teams, Google Meet, OBS, Loom, YouTube and webinars, on Mac, Windows, iPad and Chromebook.`;
+const groups = [
+  { title: "Meetings and presentations", description: "Read prepared remarks without hiding your meeting or slides.", entries: pseo.filter((e) => ["teleprompter-for-zoom", "teleprompter-for-microsoft-teams", "teleprompter-for-google-meet", "teleprompter-for-webinars", "teleprompter-for-presentations"].includes(e.slug)) },
+  { title: "Recording and streaming", description: "Arrange your script and recording source before your next take.", entries: pseo.filter((e) => ["teleprompter-for-obs", "teleprompter-for-loom", "teleprompter-for-youtube-videos"].includes(e.slug)) },
+  { title: "Your device", description: "Check floating-window support, fullscreen and keyboard controls.", entries: pseo.filter((e) => e.slug.startsWith("teleprompter-on-")) },
+];
 const itemList = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  itemListElement: pseo.map((e, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    url: absoluteUrl(`/guides/${e.slug}`),
-    name: e.h1,
-  })),
+  "@context": "https://schema.org", "@type": "ItemList",
+  itemListElement: pseo.map((e, i) => ({ "@type": "ListItem", position: i + 1, url: absoluteUrl(`/guides/${e.slug}`), name: e.h1 })),
 };
 ---
-
-<Layout title={title} description={description} path="/guides" jsonLd={[itemList]}>
-  <Header />
-  <main class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-    <nav class="text-sm text-[var(--color-fg-subtle)]" aria-label="Breadcrumb">
-      <a href="/" class="hover:text-[var(--color-fg)]">Home</a>
-      <span class="px-1.5">/</span>
-      <span class="text-[var(--color-fg-muted)]">Guides</span>
-    </nav>
-    <header class="mt-6">
-      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Guides</h1>
-      <p class="mt-4 text-lg text-[var(--color-fg-muted)]">
-        Practical setups for reading a script on camera in the apps and devices you already use — including
-        what works where. Every guide uses the same free teleprompter that runs entirely in your browser.
-      </p>
+<Layout title="Teleprompter Setup Guides" description="Free teleprompter setup guides for Zoom, Teams, Google Meet, OBS, Loom and YouTube. Check browser support, screen-sharing privacy and device-specific controls." path="/guides" jsonLd={[itemList]}>
+  <Header compact />
+  <main class="guide-index mx-auto max-w-5xl px-6 py-12 sm:py-20">
+    <nav class="text-sm text-[var(--color-fg-muted)]" aria-label="Breadcrumb"><a href="/">Home</a> / Guides</nav>
+    <header class="mt-6 max-w-2xl">
+      <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Find your teleprompter setup</h1>
+      <p class="mt-5 text-lg text-[var(--color-fg-muted)]">Choose your recording app, meeting platform or device. Every guide uses the same free browser teleprompter.</p>
+      <p class="mt-4 text-sm text-[var(--color-fg-muted)]">The floating window requires desktop Chrome or Edge. Other browsers use in-page or fullscreen reading.</p>
     </header>
-    <ul class="mt-10 grid gap-4 sm:grid-cols-2">
-      {pseo.map((e) => (
-        <li class="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-5">
-          <a href={`/guides/${e.slug}/`} class="font-semibold text-[var(--color-fg)] hover:text-[var(--color-accent)]">{e.h1}</a>
-          <p class="mt-2 text-sm text-[var(--color-fg-muted)]">{e.metaDescription}</p>
-        </li>
-      ))}
-    </ul>
+    <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-3" aria-label="Guide categories">{groups.map((g, i) => <a href={`#category-${i}`} class="font-semibold underline underline-offset-4">{g.title}</a>)}</nav>
+    {groups.map((g, i) => <section class="mt-16 scroll-mt-24" id={`category-${i}`} aria-labelledby={`category-title-${i}`}>
+      <h2 id={`category-title-${i}`} class="text-3xl font-semibold">{g.title}</h2>
+      <p class="mt-3 text-[var(--color-fg-muted)]">{g.description}</p>
+      <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+        {g.entries.map((e) => <li><a class="guide-card block h-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-6" href={`/guides/${e.slug}/`}><h3 class="text-lg font-semibold">{e.h1}</h3><p class="mt-3 text-sm leading-relaxed text-[var(--color-fg-muted)]">{e.metaDescription}</p></a></li>)}
+      </ul>
+    </section>)}
+    <p class="mt-12"><a href="/app/" class="font-semibold underline underline-offset-4">Open {site.shortName}</a> or <a href="/faq/" class="underline underline-offset-4">read the FAQ</a> for playback and privacy questions.</p>
   </main>
   <Footer />
 </Layout>
+<style>
+  .guide-index h1, .guide-index h2, .guide-index h3 { min-width: 0; overflow-wrap: break-word; text-wrap: balance; }
+  .guide-index a:focus-visible { outline: 3px solid var(--color-fg); outline-offset: 4px; }
+  .guide-index a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .guide-card:hover { border-color: var(--color-fg-muted); }
+  .guide-index a:active { background-color: var(--color-bg-muted); }
+</style>

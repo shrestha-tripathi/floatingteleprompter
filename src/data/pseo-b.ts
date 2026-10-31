@@ -15,14 +15,14 @@ export const pseoB: PseoEntry[] = [
     steps: [
       "Split your webinar into sections (intro, each topic, close) with a blank line between them.",
       "Paste the script into the teleprompter and note the estimated read time against your slot length.",
-      "Press Start, then \"Float on top\"; drag the window under your camera.",
+      "Press Start, pause after the countdown and adjust your settings. Click \"Float on top\" and drag the window near your camera.",
       "Open your webinar platform and share only your slides window, not the whole screen.",
-      "Press Space to pause for questions, then Space again to pick up where you left off.",
+      "Click the script before pressing Space to pause or resume for questions. Keyboard shortcuts need teleprompter focus.",
       "If you're running long, press the up arrow to speed up by 10 WPM at a time.",
     ],
     tips: [
       "Put cues like [SLIDE 4] or [POLL] in the script — they scroll by right when you need them.",
-      "Turn the countdown off for the second half so resuming after Q&A is instant.",
+      "Resume with Space after Q&A; normal resume does not repeat the countdown. The countdown applies when starting a new run.",
       "Keep a backup copy of your script elsewhere; the teleprompter saves to this browser only.",
       "Test once with the exact webinar tool — some platforms open a separate presenter window that you'll want to arrange around.",
     ],
@@ -52,16 +52,16 @@ export const pseoB: PseoEntry[] = [
       "Whether you're giving a recorded conference talk, a keynote on a confidence monitor, or a virtual pitch, a teleprompter lets you keep eye contact without memorising every word. The same tool covers rehearsal on a laptop and delivery on a big screen.",
     steps: [
       "Paste your speech and read the estimated duration — at the default 130 WPM, 650 words is about five minutes.",
-      "Rehearse once at the default speed, then adjust the slider to your natural pace.",
+      "Press Start, pause after the countdown, then adjust the slider to your natural pace and rehearse.",
+      "Increase font size and line height until you can read comfortably from your delivery distance, before entering fullscreen.",
       "For a confidence monitor or second screen, open the prompter there and press F for fullscreen.",
       "For a virtual presentation, press \"Float on top\" instead and place the window near your webcam.",
-      "Increase font size and line height until you can read comfortably from your delivery distance.",
     ],
     tips: [
       "Write in spoken language — short sentences and contractions read more naturally than written prose.",
       "Mark emphasis with CAPS sparingly; the teleprompter shows plain text only.",
       "On stage, have someone else run it: Space pauses and arrow keys adjust speed, so a helper with the keyboard can follow you.",
-      "Use a presentation remote's media keys if it has them — the app responds to media play/pause.",
+      "If your remote has media play/pause, test it with the app before presenting. Support depends on the browser and remote.",
     ],
     faqs: [
       {
@@ -86,11 +86,11 @@ export const pseoB: PseoEntry[] = [
     metaDescription:
       "A free teleprompter for macOS that floats over FaceTime, QuickTime, Zoom or OBS. Runs in Chrome or Edge on Mac — no App Store download, no signup.",
     intro:
-      "Most Mac teleprompter apps are paid downloads. You can get the core features — WPM scrolling, big text, mirror mode and a window that stays on top — in a browser tab instead. The only requirement for the floating window is Chrome or Edge.",
+      "You can use WPM scrolling, adjustable text, mirror mode and an always-on-top window on your Mac without downloading a native teleprompter app. The only requirement for the floating window is Chrome or Edge.",
     steps: [
       "Open the teleprompter in Chrome or Edge on your Mac.",
-      "Paste your script and set the speed and font size.",
-      "Press Start, then \"Float on top\" (or P). A small window appears above every app, including full-window QuickTime, Photo Booth or Zoom.",
+      "Paste your script, press Start and pause after the countdown. Set the speed and font size.",
+      "Click \"Float on top\" (or P). Position the floating window above your recording app and test your intended window arrangement.",
       "Drag it right under the MacBook's camera at the top-centre of the display.",
       "Use Space and the arrow keys while the teleprompter is focused, or your Mac's play/pause media key while another app is focused.",
     ],
@@ -128,10 +128,10 @@ export const pseoB: PseoEntry[] = [
       "Paste your script, then press Start.",
       "Click \"Float on top\" (or press P) to move the script into an always-on-top window.",
       "Open your recording or meeting app — Camera, Clipchamp, Teams, Zoom or OBS — and drag the floating window under your webcam.",
-      "Control it with Space, arrow keys, R and M while it's focused, or the keyboard's media play/pause key from any app.",
+      "Use Space, arrow keys, R and M with the script focused. Media play/pause may work from another app on supported browsers; test it before recording.",
     ],
     tips: [
-      "If you use the Xbox Game Bar (Win+G) to record, it captures a single app window, so the floating script stays out of the recording.",
+      "When using Xbox Game Bar or another recorder, verify a short test recording excludes your script before recording the full take.",
       "On high-DPI laptops, raise the font size — Windows display scaling can make the default text feel small from recording distance.",
       "Snap layouts won't dock the floating window; drag it manually and it stays where you put it.",
     ],
@@ -161,10 +161,10 @@ export const pseoB: PseoEntry[] = [
       "An iPad is the classic screen for a hardware teleprompter rig — and a handy one for reading while filming on another device. On iPad the teleprompter runs fullscreen rather than as a floating window, which is exactly what a rig needs.",
     steps: [
       "Open the teleprompter in Safari (or any browser) on the iPad and paste your script — AirDrop or Universal Clipboard from a Mac makes this quick.",
-      "Set Speed and a large font size for reading from a distance.",
-      "Tap Start, then tap Fullscreen.",
-      "For a beam-splitter rig, tap Mirror so the text reads correctly in the glass.",
-      "Tap Play/Pause to stop and start; use Restart for a retake.",
+      "Tap Start, pause after the countdown, then set Speed and a comfortable font size.",
+      "For a beam-splitter rig, enable Mirror before entering fullscreen.",
+      "Tap Play to resume, then Fullscreen. Mobile fullscreen may fill the browser viewport rather than use native system fullscreen.",
+      "Exit fullscreen to reach Play/Pause, Restart and settings. A focused external keyboard can control the script without exiting fullscreen.",
     ],
     tips: [
       "Turn on Do Not Disturb so notifications don't pop over the script mid-take.",
