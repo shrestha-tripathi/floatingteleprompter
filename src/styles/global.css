@@ -288,8 +288,13 @@ a {
   right: 0;
   top: 42%;
   height: 0;
-  border-top: 2px solid color-mix(in srgb, var(--color-accent) 75%, transparent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  /* An opaque, glow-free guide keeps passing white glyphs from changing its
+     colour/contrast. Keep its compositing hint separate from the moving track;
+     this is a rendering mitigation, not a guarantee of GPU layer retention. */
+  border-top: 2px solid var(--color-accent);
+  box-shadow: none;
+  transform: translateZ(0);
+  will-change: transform;
   pointer-events: none;
   z-index: 5;
 }
@@ -299,7 +304,7 @@ a {
   left: 0.75rem;
   top: -5px;
   border: 5px solid transparent;
-  border-left-color: color-mix(in srgb, var(--color-accent) 85%, transparent);
+  border-left-color: var(--color-accent);
 }
 .ftp-eyeline::after {
   content: "";
@@ -307,7 +312,7 @@ a {
   right: 0.75rem;
   top: -5px;
   border: 5px solid transparent;
-  border-right-color: color-mix(in srgb, var(--color-accent) 85%, transparent);
+  border-right-color: var(--color-accent);
 }
 .ftp-eyeline.is-hidden {
   display: none;
