@@ -19,6 +19,8 @@ const LS = {
   width: "ftp:width",
   mirror: "ftp:mirror",
   countdown: "ftp:countdown",
+  readingMode: "ftp:reading-mode",
+  colourRead: "ftp:colour-read",
 };
 
 function lsGet(key: string, fallback: string): string {
@@ -50,6 +52,7 @@ function getDocPiP(): DocumentPiP | null {
 }
 
 import { registerWebMcpTools, text as mcpText } from "./webmcp";
+import { parseReadingMode, tokenizeScript, paintedWordCount, wordRowOffsets, wordScrollOffset, type ReadingMode } from "./reading";
 
 export function initTeleprompter(): void {
   const editor = $("ftp-editor");
@@ -59,6 +62,12 @@ export function initTeleprompter(): void {
   const stage = $("ftp-stage");
   const viewport = $("ftp-viewport");
   const track = $("ftp-track");
+  const readTrack = $("ftp-read-track");
+  const readLayer = $("ftp-read-layer");
+  const modeGuide = $<HTMLInputElement>("ftp-mode-guide");
+  const modeWords = $<HTMLInputElement>("ftp-mode-words");
+  const colourReadToggle = $<HTMLInputElement>("ftp-colour-read");
+  const colourReadSetting = $("ftp-colour-read-setting");
   const statusBadge = $("ftp-status-badge");
   const countdownEl = $("ftp-countdown");
   const endcard = $("ftp-endcard");
@@ -104,6 +113,12 @@ export function initTeleprompter(): void {
   let maxOffset = 1; // recomputed on layout
   let mirrored = lsGet(LS.mirror, "0") === "1";
   let textHeight = 1; // rendered height of the script text (excl. padding)
+  let readingMode: ReadingMode = parseReadingMode(lsGet(LS.readingMode, "guide"));
+  let colourRead = lsGet(LS.colourRead, "0") === "1";
+  let wordPosition = 0; // fractional words elapsed, independent of viewport reflow
+  let wordNodes: HTMLSpanElement[] = [];
+  let wordRows: number[] = [];
+  let paintedCount = 0;
   // Silent-audio element used to arm OS media keys (see MediaSession section).
   let silentAudio: HTMLAudioElement | null = null;
   let mediaSessionWired = false;
@@ -127,15 +142,77 @@ export function initTeleprompter(): void {
 
   function applyTypography(): void {
     if (!track) return;
-    track.style.fontSize = `${font?.value ?? 48}px`;
-    track.style.lineHeight = String(lh?.value ?? 1.5);
-    track.style.maxWidth = `${width?.value ?? 80}%`;
+    for (const node of [track, readTrack]) {
+      if (!node) continue;
+      node.style.fontSize = `${font?.value ?? 48}px`;
+      node.style.lineHeight = String(lh?.value ?? 1.5);
+      node.style.maxWidth = `${width?.value ?? 80}%`;
+    }
   }
 
   function renderScript(): void {
     if (!track) return;
     const text = scriptBox?.value ?? "";
-    track.textContent = text.trim().length ? text : "Your script will appear here…";
+    const content = text.trim().length ? text : "Your script will appear here…";
+    wordNodes = [];
+    wordRows = [];
+    paintedCount = 0;
+    if (readingMode === "words") {
+      const doc = track.ownerDocument;
+      const fragment = doc.createDocumentFragment();
+      for (const token of tokenizeScript(content)) {
+        if (!token.word) {
+          fragment.appendChild(doc.createTextNode(token.text));
+          continue;
+        }
+        const span = doc.createElement("span");
+        span.className = "ftp-word";
+        span.textContent = token.text;
+        wordNodes.push(span);
+        fragment.appendChild(span);
+      }
+      track.replaceChildren(fragment);
+      updateWordPaint();
+    } else {
+      track.textContent = content;
+    }
+    if (readTrack) readTrack.textContent = content;
+  }
+
+  function updateWordPaint(): void {
+    const next = paintedWordCount(wordPosition, wordNodes.length);
+    // Touch only words whose state changed, never every word on every frame.
+    for (let i = Math.min(next, paintedCount); i < Math.max(next, paintedCount); i++) {
+      wordNodes[i].classList.toggle("is-read", i < next);
+    }
+    paintedCount = next;
+  }
+
+  function syncReadingStyle(): void {
+    const split = readingMode === "guide" && colourRead;
+    stage?.classList.toggle("is-word-mode", readingMode === "words");
+    stage?.classList.toggle("is-colour-read", split);
+    if (readLayer) readLayer.hidden = !split;
+    if (colourReadSetting) colourReadSetting.hidden = readingMode === "words";
+    if (colourReadToggle) colourReadToggle.checked = colourRead;
+    if (modeGuide) modeGuide.checked = readingMode === "guide";
+    if (modeWords) modeWords.checked = readingMode === "words";
+  }
+
+  function setReadingMode(mode: ReadingMode): void {
+    if (mode === readingMode) return;
+    const ratio = readingMode === "words"
+      ? wordPosition / Math.max(1, wordNodes.length)
+      : offset / Math.max(1, maxOffset);
+    readingMode = mode;
+    wordPosition = Math.min(currentWordCount(), Math.max(0, ratio * currentWordCount()));
+    syncReadingStyle();
+    renderScript();
+    applyTypography();
+    if (recomputeBounds() && readingMode === "guide") offset = Math.min(1, ratio) * maxOffset;
+    applyTransform();
+    updateProgress();
+    lsSet(LS.readingMode, mode);
   }
 
   // The track starts with its first line on the eyeline (≈42% down the stage),
@@ -148,13 +225,21 @@ export function initTeleprompter(): void {
     const vpH = viewport.clientHeight;
     if (vpH < 40) return false; // not laid out yet — caller should retry
     const startPad = vpH * 0.42;
-    track.style.paddingTop = `${startPad}px`;
-    track.style.paddingBottom = `${vpH * 0.55}px`;
+    for (const node of [track, readTrack]) {
+      if (!node) continue;
+      node.style.paddingTop = `${startPad}px`;
+      node.style.paddingBottom = `${vpH * 0.55}px`;
+    }
     // Real text height = full scrollHeight minus the top+bottom padding we added.
     textHeight = Math.max(1, track.scrollHeight - startPad - vpH * 0.55);
     // Scroll distance: move the whole text past the eyeline. The first line sits
     // at startPad; we scroll until the text bottom reaches the eyeline.
     maxOffset = Math.max(1, textHeight);
+    if (readingMode === "words" && wordNodes.length) {
+      wordRows = wordRowOffsets(wordNodes.map((node) => node.offsetTop), startPad);
+      offset = wordScrollOffset(wordPosition, wordRows);
+      applyTransform();
+    }
     return true;
   }
 
@@ -187,7 +272,7 @@ export function initTeleprompter(): void {
   function remeasureNow(): void {
     const prevRatio = maxOffset > 0 ? offset / maxOffset : 0;
     if (!recomputeBounds()) return; // not laid out yet — a later trigger retries
-    offset = Math.min(maxOffset, Math.max(0, prevRatio * maxOffset));
+    if (readingMode === "guide") offset = Math.min(maxOffset, Math.max(0, prevRatio * maxOffset));
     applyTransform();
     updateProgress();
   }
@@ -213,6 +298,9 @@ export function initTeleprompter(): void {
     // per-frame re-snap is what read as a tiny vertical shimmer/shake mid-scroll.
     const base = `translate3d(-50%, ${-offset}px, 0)`;
     track.style.transform = mirrored ? `${base} scaleX(-1)` : base;
+    if (readingMode === "guide" && colourRead && readTrack) {
+      readTrack.style.transform = track.style.transform;
+    }
   }
 
   function fmtTime(sec: number): string {
@@ -223,11 +311,15 @@ export function initTeleprompter(): void {
   }
 
   function updateProgress(): void {
-    const ratio = Math.min(1, offset / maxOffset);
+    const wordsMode = readingMode === "words";
+    const ratio = Math.min(1, wordsMode ? wordPosition / Math.max(1, wordNodes.length) : offset / maxOffset);
     if (progress) progress.style.width = `${ratio * 100}%`;
     const pps = pxPerSecond();
     const remainingPx = Math.max(0, maxOffset - offset);
-    if (timeEl) timeEl.textContent = fmtTime(pps > 0 ? remainingPx / pps : 0);
+    const remainingSec = wordsMode
+      ? Math.max(0, wordNodes.length - wordPosition) * 60 / Number(speed?.value ?? 130)
+      : (pps > 0 ? remainingPx / pps : 0);
+    if (timeEl) timeEl.textContent = fmtTime(remainingSec);
   }
 
   function tick(ts: number): void {
@@ -235,9 +327,16 @@ export function initTeleprompter(): void {
     if (!lastTs) lastTs = ts;
     const dt = (ts - lastTs) / 1000;
     lastTs = ts;
-    offset += pxPerSecond() * dt;
-    if (offset >= maxOffset) {
-      offset = maxOffset;
+    if (readingMode === "words") {
+      wordPosition = Math.min(wordNodes.length, wordPosition + Number(speed?.value ?? 130) * dt / 60);
+      updateWordPaint();
+      offset = wordScrollOffset(wordPosition, wordRows);
+    } else {
+      offset += pxPerSecond() * dt;
+    }
+    const finished = readingMode === "words" ? wordPosition >= wordNodes.length : offset >= maxOffset;
+    if (finished) {
+      if (readingMode === "guide") offset = maxOffset;
       applyTransform();
       updateProgress();
       pause();
@@ -279,7 +378,10 @@ export function initTeleprompter(): void {
   }
 
   function restart(): void {
-    offset = 0;
+    wordPosition = 0;
+    updateWordPaint();
+    lastTs = 0;
+    offset = readingMode === "words" ? wordScrollOffset(0, wordRows) : 0;
     applyTransform();
     updateProgress();
     endcard?.classList.add("hidden");
@@ -751,6 +853,7 @@ export function initTeleprompter(): void {
   if (lh) lh.value = lsGet(LS.lh, "1.5");
   if (width) width.value = lsGet(LS.width, "80");
   if (countdownToggle) countdownToggle.checked = lsGet(LS.countdown, "1") === "1";
+  syncReadingStyle();
   setMirror(mirrored);
 
   function syncSliderLabels(): void {
@@ -821,6 +924,18 @@ export function initTeleprompter(): void {
     applyTypography();
     recomputeBounds();
     lsSet(LS.width, width.value);
+  });
+  modeGuide?.addEventListener("change", () => {
+    if (modeGuide.checked) setReadingMode("guide");
+  });
+  modeWords?.addEventListener("change", () => {
+    if (modeWords.checked) setReadingMode("words");
+  });
+  colourReadToggle?.addEventListener("change", () => {
+    colourRead = colourReadToggle.checked;
+    syncReadingStyle();
+    applyTransform();
+    lsSet(LS.colourRead, colourRead ? "1" : "0");
   });
   countdownToggle?.addEventListener("change", () =>
     lsSet(LS.countdown, countdownToggle.checked ? "1" : "0"),

@@ -248,6 +248,31 @@ a {
   );
 }
 
+/* Fixed full-viewport clips, not a repainted gradient on the tall text track. */
+.ftp-unread-layer,
+.ftp-read-layer {
+  position: absolute;
+  inset: 0;
+}
+.ftp-read-layer {
+  pointer-events: none;
+  clip-path: inset(0 0 58% 0);
+}
+.ftp-stage.is-colour-read .ftp-unread-layer {
+  clip-path: inset(42% 0 0 0);
+}
+#ftp-colour-read-setting[hidden],
+.ftp-read-layer[hidden] {
+  display: none;
+}
+.ftp-track.ftp-read-track,
+.ftp-word.is-read {
+  color: var(--color-accent);
+}
+.ftp-stage.is-word-mode .ftp-eyeline {
+  display: none;
+}
+
 /* The moving text track — translateY is set by JS each animation frame. */
 .ftp-track {
   position: absolute;

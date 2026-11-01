@@ -95,7 +95,11 @@ const webAppSchema = {
         style="height: min(60vh, 520px);"
       >
         <div id="ftp-viewport" class="ftp-viewport">
-          <div id="ftp-track" class="ftp-track" style="font-size: 48px; line-height: 1.5; max-width: 80%;">
+          <div class="ftp-unread-layer">
+            <div id="ftp-track" class="ftp-track" style="font-size: 48px; line-height: 1.5; max-width: 80%;"></div>
+          </div>
+          <div id="ftp-read-layer" class="ftp-read-layer" aria-hidden="true" hidden>
+            <div id="ftp-read-track" class="ftp-track ftp-read-track"></div>
           </div>
         </div>
         <div id="ftp-eyeline" class="ftp-eyeline" aria-hidden="true"></div>
@@ -131,6 +135,27 @@ const webAppSchema = {
         <button id="ftp-edit" type="button" class="ftp-control-btn" title="Back to editing">Edit script</button>
         <button id="ftp-help" type="button" class="ftp-control-btn" aria-keyshortcuts="?" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
       </div>
+
+      <fieldset class="mx-auto mt-5 max-w-3xl rounded-xl border border-[var(--color-border)] p-4">
+        <legend class="px-2 text-sm font-semibold">Reading style</legend>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <label class="flex min-h-11 cursor-pointer items-center gap-2">
+            <input id="ftp-mode-guide" type="radio" name="ftp-reading-mode" value="guide" checked class="size-4 accent-[var(--color-accent)]" />
+            Guide line
+          </label>
+          <label class="flex min-h-11 cursor-pointer items-center gap-2">
+            <input id="ftp-mode-words" type="radio" name="ftp-reading-mode" value="words" class="size-4 accent-[var(--color-accent)]" />
+            Word highlighting
+          </label>
+        </div>
+        <label id="ftp-colour-read-setting" class="flex min-h-11 cursor-pointer items-center gap-2 text-sm">
+          <input id="ftp-colour-read" type="checkbox" class="size-4 accent-[var(--color-accent)]" />
+          Colour text above the guide orange
+        </label>
+        <p class="mt-2 text-sm text-[var(--color-fg-muted)]">
+          Word highlighting paints words orange in reading order at your selected WPM. No microphone or voice tracking.
+        </p>
+      </fieldset>
 
       {/* Settings sliders */}
       <div class="mx-auto mt-5 grid max-w-3xl grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">

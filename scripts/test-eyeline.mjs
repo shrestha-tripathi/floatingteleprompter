@@ -4,9 +4,11 @@ import { test } from 'node:test';
 
 const css = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
 const rule = selector => {
-  const start = css.indexOf(`${selector} {`);
-  assert.notEqual(start, -1, `Missing ${selector}`);
-  return css.slice(start, css.indexOf('}', start) + 1);
+  // Exact selector at line start, not a suffix of a contextual override.
+  const block = css.split('\n').findIndex(line => line === `${selector} {`);
+  assert.notEqual(block, -1, `Missing ${selector}`);
+  const lines = css.split('\n').slice(block);
+  return lines.slice(0, lines.findIndex(line => line === '}') + 1).join('\n');
 };
 
 test('reading guide is opaque and has no glow that blends with moving text', () => {
